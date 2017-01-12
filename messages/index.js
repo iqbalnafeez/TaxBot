@@ -39,6 +39,7 @@ var intents = new builder.IntentDialog({ recognizers: [recognizer] })
 .matches('Greet', (session, args) => {
     session.send('Greet intent. You said: \'%s\'.', session.message.text);
 })
+.matches("Help", builder.DialogAction.send('This is a help message'))
 .onDefault((session) => {
     session.send('Sorry, I did not understand \'%s\'.', session.message.text);
 });
