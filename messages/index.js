@@ -68,7 +68,16 @@ intents.matches('QnA', [
     }
 ]);
 
-intents.matches("Help", builder.DialogAction.send('This is a help message'));
+intents.matches("Help", [
+    function (session) {
+        session.send('Ob Sie nicht die Terminologie verstehen können Sie mir fragen. Zum Beispiel, "Was ist BEPS" schaut eine Erklärung für "BEPS". "QnA" schaut die Inhaltverzeichnis was ich erklären kann.');
+        //builder.DialogAction.send('This is a help message')
+    }
+]);
+
+intents.matches(/^qna/i, function (session) {
+    session.send('Hier ist meine Inhaltverzeichnis: %s', Object.keys(qnadict));
+});
 
 intents.onDefault((session) => {
     session.send('Sorry, I did not understand \'%s\'. Type \'help\' if you need assistance.', session.message.text);
