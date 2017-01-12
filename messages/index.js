@@ -20,12 +20,13 @@ var connector = useEmulator ? new builder.ChatConnector() : new botbuilder_azure
 var bot = new builder.UniversalBot(connector);
 
 // Make sure you add code to validate these fields
-//var luisAppId = process.env.LuisAppId;
-//var luisAPIKey = process.env.LuisAPIKey;
-//var luisAPIHostName = process.env.LuisAPIHostName || 'api.projectoxford.ai';
+var luisAppId = process.env.LuisAppId;
+var luisAPIKey = process.env.LuisAPIKey;
+var luisAPIHostName = process.env.LuisAPIHostName || 'api.projectoxford.ai';
 
+const LuisModelUrl = 'https://' + luisAPIHostName + '/luis/v2.0/apps/' + luisAppId + '?subscription-key=' + luisAPIKey + '&verbose=true';
 //const LuisModelUrl = 'https://' + luisAPIHostName + '/luis/v1/application?id=' + luisAppId + '&subscription-key=' + luisAPIKey;
-const LuisModelUrl = 'https://api.projectoxford.ai/luis/v2.0/apps/1482e9bf-8ff8-4391-980d-9c3170e5f5ba?subscription-key=9e181c21f7c3487184e4ee1f10989896&verbose=true';
+//const LuisModelUrl = 'https://api.projectoxford.ai/luis/v2.0/apps/1482e9bf-8ff8-4391-980d-9c3170e5f5ba?subscription-key=9e181c21f7c3487184e4ee1f10989896&verbose=true';
 
 // Main dialog with LUIS
 var recognizer = new builder.LuisRecognizer(LuisModelUrl);
