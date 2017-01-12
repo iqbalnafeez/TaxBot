@@ -7,6 +7,10 @@ http://docs.botframework.com/builder/node/guides/understanding-natural-language/
 "use strict";
 var builder = require("botbuilder");
 var botbuilder_azure = require("botbuilder-azure");
+var didYouMean = require("didyoumean2");
+
+// Dictionaries
+var qnadict = require('./dictionaries/qnadict');
 
 var useEmulator = (process.env.NODE_ENV == 'development');
 
@@ -25,24 +29,49 @@ var luisAPIKey = process.env.LuisAPIKey;
 var luisAPIHostName = process.env.LuisAPIHostName || 'api.projectoxford.ai';
 
 const LuisModelUrl = 'https://' + luisAPIHostName + '/luis/v2.0/apps/' + luisAppId + '?subscription-key=' + luisAPIKey + '&verbose=true';
-//const LuisModelUrl = 'https://' + luisAPIHostName + '/luis/v1/application?id=' + luisAppId + '&subscription-key=' + luisAPIKey;
-//const LuisModelUrl = 'https://api.projectoxford.ai/luis/v2.0/apps/1482e9bf-8ff8-4391-980d-9c3170e5f5ba?subscription-key=9e181c21f7c3487184e4ee1f10989896&verbose=true';
 
 // Main dialog with LUIS
 var recognizer = new builder.LuisRecognizer(LuisModelUrl);
-var intents = new builder.IntentDialog({ recognizers: [recognizer] })
-/*
-.matches('<yourIntent>')... See details at http://docs.botframework.com/builder/node/guides/understanding-natural-language/
-*/
-.matches('None', (session, args) => {
-    session.send('Hi! This is the None intent handler. You said: \'%s\'.', session.message.text);
-})
-.matches('Greet', (session, args) => {
-    session.send('Greet intent. You said: \'%s\'.', session.message.text);
-})
-.matches("Help", builder.DialogAction.send('This is a help message'))
-.onDefault((session) => {
-    session.send('Sorry, I did not understand \'%s\'.', session.message.text);
+var intents = new builder.IntentDialog({ recognizers: [recognizer] });
+
+intents.matches(/^version/i, function (session) {
+    session.send('Bot version 0.1');
+});
+
+intents.matches(/^user/i, function (session) {
+    session.send('You are %s.', session.privateConversationData.username);
+});
+
+intents.matches('Greet', [
+    function (session, args, next) {
+        var user = builder.EntityRecognizer.findEntity(args.entities, 'User');
+        console.log(user);
+        if (user) { // utterance contained a name
+            session.privateConversationData.username = user.entity;
+        } else {
+            session.send('no name');
+            //session.beginDialog('/askName');
+        }
+        session.send('Howdy %s!', session.privateConversationData.username);
+    }
+]);
+
+intents.matches('QnA', [
+    function (session, args) {
+        var topic = builder.EntityRecognizer.findEntity(args.entities, 'Topic');
+        console.log(topic);
+        var keys = Object.keys(qnadict);
+        var bestMatch = didYouMean(topic.entity, keys);
+        console.log(bestMatch);
+        session.send('Sie möchten wissen was %s meint? Moment bitte, ich suche ein Antwort führ Sie.', bestMatch);
+        session.send(qnadict[bestMatch]);
+    }
+]);
+
+intents.matches("Help", builder.DialogAction.send('This is a help message'));
+
+intents.onDefault((session) => {
+    session.send('Sorry, I did not understand \'%s\'. Type \'help\' if you need assistance.', session.message.text);
 });
 
 bot.dialog('/', intents);    
