@@ -38,6 +38,9 @@ const LuisModelUrl = 'https://' + luisAPIHostName + '/luis/v2.0/apps/' + luisApp
 var recognizer = new builder.LuisRecognizer(LuisModelUrl);
 var intents = new builder.IntentDialog({ recognizers: [recognizer] });
 
+// Dialogs
+var di_askName = require('./dialogs/askName');
+
 // Starting a new conversation will trigger this message
 bot.on('conversationUpdate', 
     function (message) {
@@ -46,17 +49,11 @@ bot.on('conversationUpdate',
             .address(message.address)
             .text(instructions);
         bot.send(reply);
-        session.beginDialog('Greet');
+        bot.beginDialog(message.address, '/askName', {}) // fills user name
     }
 );
 
-bot.dialog('/askName', [
-    function (session) {
-        //Prompt for user input
-        builder.Prompts.text(session, 'Was ist Ihre Name?');
-    }
-]);
-
+bot.dialog('/askName', di_askName.Dialog);
 
 intents.matches(/^version/i, function (session) {
     session.send('Bot version 0.1');
