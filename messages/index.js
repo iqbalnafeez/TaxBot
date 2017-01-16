@@ -43,13 +43,13 @@ var di_askName = require('./dialogs/askName');
 
 // Starting a new conversation will trigger this message
 bot.on('conversationUpdate', 
-    function (message) {
+    function (message, session) {
         var instructions = 'Grüezi! Ich bin der KPMG Virtual Tax Advisor, der USR III Chatbot.';
         var reply = new builder.Message()
             .address(message.address)
             .text(instructions);
         bot.send(reply);
-        bot.beginDialog(message.address, '/askName', {}) // fills user name
+        bot.beginDialog(message.address, '/askName', {}); // fills user name
     }
 );
 
@@ -100,7 +100,9 @@ intents.matches(/^qna/i, function (session) {
 });
 
 intents.onDefault((session) => {
-    session.send('Sorry, I did not understand \'%s\'. Type \'help\' if you need assistance.', session.message.text);
+    //session.send('Sorry, I did not understand \'%s\'. Type \'help\' if you need assistance.', session.message.text);
+    session.send("Dies kann ich Ihnen leider nicht beantworten. Bitte beachten Sie, dass dieser ChatBot auf Fragen zur Unternehmenssteuerreform III (USR III) limitiert ist.");
+    session.send("Darf einer unserer Steuerfachpersonen Sie diesbezüglich kontaktieren?");
 });
 
 bot.dialog('/', intents);    
