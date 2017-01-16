@@ -34,6 +34,15 @@ const LuisModelUrl = 'https://' + luisAPIHostName + '/luis/v2.0/apps/' + luisApp
 var recognizer = new builder.LuisRecognizer(LuisModelUrl);
 var intents = new builder.IntentDialog({ recognizers: [recognizer] });
 
+// Starting a new conversation will trigger this message
+bot.on('conversationUpdate', function (message) {
+    var instructions = 'Willkommen nach KPMG! Ich bin Ihre Virtual Tax Advisor.';
+    var reply = new builder.Message()
+        .address(message.address)
+        .text(instructions);
+    bot.send(reply);
+});
+
 intents.matches(/^version/i, function (session) {
     session.send('Bot version 0.1');
 });
