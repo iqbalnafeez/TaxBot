@@ -6,7 +6,8 @@
   "dependencies": {
     "botbuilder": "^3.4.2",
     "botbuilder-azure": "0.0.1",
-    "didyoumean2": "^1.2.0"
+    "didyoumean2": "^1.2.0",
+    "dotenv-extended": "^1.0.4"
   },
   "devDependencies": {
     "restify": "^4.1.1"

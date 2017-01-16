@@ -5,6 +5,10 @@ For a complete walkthrough of creating this type of bot see the article at
 http://docs.botframework.com/builder/node/guides/understanding-natural-language/
 -----------------------------------------------------------------------------*/
 "use strict";
+
+// This loads the environment variables from the .env file
+require('dotenv-extended').load();
+
 var builder = require("botbuilder");
 var botbuilder_azure = require("botbuilder-azure");
 var didYouMean = require("didyoumean2");
@@ -20,7 +24,7 @@ var connector = useEmulator ? new builder.ChatConnector() : new botbuilder_azure
     stateEndpoint: process.env['BotStateEndpoint'],
     openIdMetadata: process.env['BotOpenIdMetadata']
 });
-
+//var connector = new builder.ConsoleConnector(); // local debugging
 var bot = new builder.UniversalBot(connector);
 
 // Make sure you add code to validate these fields
@@ -42,7 +46,7 @@ bot.on('conversationUpdate',
             .address(message.address)
             .text(instructions);
         bot.send(reply);
-        session.beginDialog('/askName');
+        session.beginDialog('Greet');
     }
 );
 
@@ -91,7 +95,6 @@ intents.matches('QnA', [
 intents.matches("Help", [
     function (session) {
         session.send('Ob Sie nicht die Terminologie verstehen können Sie mir fragen. Zum Beispiel, "Was ist BEPS" schaut eine Erklärung für "BEPS". "QnA" schaut die Inhaltverzeichnis was ich erklären kann.');
-        //builder.DialogAction.send('This is a help message')
     }
 ]);
 
@@ -106,12 +109,14 @@ intents.onDefault((session) => {
 bot.dialog('/', intents);    
 
 if (useEmulator) {
+    // Set up restify server
     var restify = require('restify');
     var server = restify.createServer();
-    server.listen(3978, function() {
-        console.log('test bot endpont at http://localhost:3978/api/messages');
+    server.listen(process.env.port || process.env.PORT || 3978, function(){
+        console.log('%s listening to %s', server.name, server.url);
     });
     server.post('/api/messages', connector.listen());    
+    connector.listen(); // terminal connector
 } else {
     module.exports = { default: connector.listen() }
 }
