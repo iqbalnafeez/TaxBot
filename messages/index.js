@@ -102,7 +102,7 @@ intents.matches(/^qna/i, function (session) {
 intents.onDefault((session) => {
     //session.send('Sorry, I did not understand \'%s\'. Type \'help\' if you need assistance.', session.message.text);
     session.send("Dies kann ich Ihnen leider nicht beantworten. Bitte beachten Sie, dass dieser ChatBot auf Fragen zur Unternehmenssteuerreform III (USR III) limitiert ist.");
-    session.send("Darf einer unserer Steuerfachpersonen Sie diesbezüglich kontaktieren?");
+    builder.Prompts.choice(session, "Darf einer unserer Steuerfachpersonen Sie diesbezüglich kontaktieren?", ['Ja', 'Nein']);
 });
 
 bot.dialog('/', intents);    
