@@ -35,13 +35,24 @@ var recognizer = new builder.LuisRecognizer(LuisModelUrl);
 var intents = new builder.IntentDialog({ recognizers: [recognizer] });
 
 // Starting a new conversation will trigger this message
-bot.on('conversationUpdate', function (message) {
-    var instructions = 'Willkommen nach KPMG! Ich bin Ihre Virtual Tax Advisor.';
-    var reply = new builder.Message()
-        .address(message.address)
-        .text(instructions);
-    bot.send(reply);
-});
+bot.on('conversationUpdate', 
+    function (message) {
+        var instructions = 'Grüezi! Ich bin der KPMG Virtual Tax Advisor, der USR III Chatbot.';
+        var reply = new builder.Message()
+            .address(message.address)
+            .text(instructions);
+        bot.send(reply);
+        session.beginDialog('/askName');
+    }
+);
+
+bot.dialog('/askName', [
+    function (session) {
+        //Prompt for user input
+        builder.Prompts.text(session, 'Was ist Ihre Name?');
+    }
+]);
+
 
 intents.matches(/^version/i, function (session) {
     session.send('Bot version 0.1');
