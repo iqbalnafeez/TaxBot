@@ -109,11 +109,20 @@ intents.matches(/^qna/i, function (session) {
     session.send('Hier ist meine Inhaltverzeichnis: %s', Object.keys(qnadict));
 });
 
-intents.onDefault((session) => {
-    //session.send('Sorry, I did not understand \'%s\'. Type \'help\' if you need assistance.', session.message.text);
-    session.send("Dies kann ich Ihnen leider nicht beantworten. Bitte beachten Sie, dass dieser ChatBot auf Fragen zur Unternehmenssteuerreform III (USR III) limitiert ist.");
-    builder.Prompts.choice(session, "Darf einer unserer Steuerfachpersonen Sie diesbezüglich kontaktieren?", ['Ja', 'Nein']);
-});
+intents.onDefault([(session) => {
+        session.send("Dies kann ich Ihnen leider nicht beantworten. Bitte beachten Sie, dass dieser ChatBot auf Fragen zur Unternehmenssteuerreform III (USR III) limitiert ist.");
+        builder.Prompts.choice(session, "Darf einer unserer Steuerfachpersonen Sie diesbezüglich kontaktieren?", ['Ja', 'Nein']);
+    }, 
+    function (session, results) {
+        if (results.response) {
+            if (results.response.entity == 'Ja') {
+                session.replaceDialog('/contactForm');
+            } else if (results.response.entity == 'Nein') {
+                session.endDialog();
+            }
+        }
+    }
+]);
 
 bot.dialog('/', intents);    
 
