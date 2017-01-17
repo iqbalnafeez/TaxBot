@@ -1,3 +1,4 @@
 {
-    "default_choice": "I verstehe nicht. Bitte antworten Sie mit einem Option von der Liste."
+    "default_choice": "I verstehe nicht. Bitte antworten Sie mit einem Option von der Liste.",
+    "default_confirm": "I verstehe nicht. Bitte antworten 'ja' oder 'nein'."
 }

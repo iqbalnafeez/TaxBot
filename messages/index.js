@@ -52,12 +52,18 @@ var di_contactForm = require('./dialogs/contactForm');
 // Starting a new conversation will trigger this message
 bot.on('conversationUpdate', 
     function (message, session) {
-        var instructions = 'Grüezi! Ich bin der KPMG Virtual Tax Advisor, der USR III Chatbot.';
-        var reply = new builder.Message()
-            .address(message.address)
-            .text(instructions);
-        bot.send(reply);
-        bot.beginDialog(message.address, '/askName', {}); // fills user name
+        if (message.membersAdded) {
+            message.membersAdded.forEach((identity) => {
+            if (identity.id === message.address.bot.id) {
+                var instructions = 'Grüezi! Ich bin der KPMG Virtual Tax Advisor, der USR III Chatbot.';
+                var reply = new builder.Message()
+                    .address(message.address)
+                    .text(instructions);
+                bot.send(reply);
+                bot.beginDialog(message.address, '/askName', {}); // fills user name
+            }
+            });
+        }
     }
 );
 
