@@ -46,6 +46,8 @@ var intents = new builder.IntentDialog({ recognizers: [recognizer] });
 
 // Dialogs
 var di_askName = require('./dialogs/askName');
+var di_greetUser = require('./dialogs/greetUser');
+var di_contactForm = require('./dialogs/contactForm');
 
 // Starting a new conversation will trigger this message
 bot.on('conversationUpdate', 
@@ -60,28 +62,24 @@ bot.on('conversationUpdate',
 );
 
 bot.dialog('/askName', di_askName.Dialog);
+bot.dialog('/greetUser', di_greetUser.Dialog);
+bot.dialog('/contactForm', di_contactForm.Dialog);
 
 intents.matches(/^version/i, function (session) {
     session.send('Bot version 0.1');
+});
+
+intents.matches(/^contactForm/i, function (session) {
+    session.beginDialog('/contactForm');
 });
 
 intents.matches(/^user/i, function (session) {
     session.send('You are %s.', session.privateConversationData.username);
 });
 
-intents.matches('Greet', [
-    function (session, args, next) {
-        var user = builder.EntityRecognizer.findEntity(args.entities, 'User');
-        console.log(user);
-        if (user) { // utterance contained a name
-            session.privateConversationData.username = user.entity;
-        } else {
-            session.send('no name');
-            //session.beginDialog('/askName');
-        }
-        session.send('Howdy %s!', session.privateConversationData.username);
-    }
-]);
+intents.matches('Greet', function (session, args) {
+    session.beginDialog('/greetUser', {entities:args.entities})
+});
 
 intents.matches('QnA', [
     function (session, args) {
