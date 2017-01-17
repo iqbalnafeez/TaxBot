@@ -12,12 +12,13 @@ module.exports = {
             if (!session.privateConversationData.username) { // Does not have name from earlier in the conversation or through the LUIS utterance
                     builder.Prompts.text(session, 'Wie ist Ihre Name?');
             } else {
-                session.endDialog();
+                session.endDialog("Upper ending");
             }
         },
         function (session, results, next) {
             if (results.response) {
                 session.privateConversationData.username = results.response;
+                session.send("Have response");
                 next();
             }
         },
