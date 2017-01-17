@@ -4,7 +4,20 @@ var botbuilder_azure = require("botbuilder-azure");
 module.exports = {
     Label: 'Ask name',
     Dialog: [
+
         function (session, args,  next) {
+            // Set up language context for the entire session
+            locale='de'; // Force German language
+            session.preferredLocale(locale, function (err) {
+                if (!err) {
+                    // Locale files loaded
+                } else {
+                    // Problem loading the selected locale
+                    session.error(err);
+                }
+            });
+
+            // Request user name
             var user = builder.EntityRecognizer.findEntity(args.entities, 'User');
             if (user) { // utterance contained a name
                 session.privateConversationData.username = user.entity;
@@ -19,7 +32,7 @@ module.exports = {
             if (results.response) {
                 session.privateConversationData.username = results.response;
                 session.send("Have response");
-                next();
+//                next();
             }
         },
         function (session) {
