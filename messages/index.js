@@ -27,6 +27,12 @@ var connector = useEmulator ? new builder.ChatConnector() : new botbuilder_azure
 //var connector = new builder.ConsoleConnector(); // local debugging
 var bot = new builder.UniversalBot(connector);
 
+// Configure bots default locale and locale folder path.
+bot.set('localizerSettings', {
+    botLocalePath: "./locale", 
+    defaultLocale: "de" 
+});
+
 // Make sure you add code to validate these fields
 var luisAppId = process.env.LuisAppId;
 var luisAPIKey = process.env.LuisAPIKey;
