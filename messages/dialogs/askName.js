@@ -5,17 +5,9 @@ module.exports = {
     Label: 'Ask name',
     Dialog: [
 
-        function (session, args,  next) {
+        function (session) {
             // Request user name
-            var user = builder.EntityRecognizer.findEntity(args.entities, 'User');
-            if (user) { // utterance contained a name
-                session.privateConversationData.username = user.entity;
-            }
-            if (!session.privateConversationData.username) { // Does not have name from earlier in the conversation or through the LUIS utterance
-                builder.Prompts.text(session, 'Wie ist Ihre Name?');
-            } else {
-                session.endDialog("Upper ending");
-            }
+            builder.Prompts.text(session, 'Wie ist Ihre Name?');
         },
         function (session, results, next) {
             if (results.response) {

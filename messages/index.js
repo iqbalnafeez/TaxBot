@@ -60,7 +60,7 @@ bot.on('conversationUpdate',
                     .address(message.address)
                     .text(instructions);
                 bot.send(reply);
-                bot.beginDialog(message.address, '/askName', {}); // fills user name
+                bot.beginDialog(message.address, '/askName'); // fills user name
             }
             });
         }
