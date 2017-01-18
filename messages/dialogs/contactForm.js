@@ -53,6 +53,7 @@ module.exports = {
         function (session, results, next) {
             if (results.response) {
                 session.send('Have response');
+                next();
             }
         },
         function (session) {
