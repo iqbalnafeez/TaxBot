@@ -7,14 +7,11 @@ module.exports = {
         function (session) {
             builder.Prompts.text(session, 'Wie lautet Ihre Name?');
         },
-        function (session, results, next) {
+        function (session, results) {
             if (results.response) {
                 session.privateConversationData.username = results.response;
-                next();
+                session.endDialog("Hallo %s, es freut mich dass Sie den USR III Chatbot nutzen.", session.privateConversationData.username);
             }
-        },
-        function (session) {
-            session.endDialog("Hallo %s, es freut mich dass Sie den USR III Chatbot nutzen.", session.privateConversationData.username);
         }
     ]
 }
