@@ -51,7 +51,7 @@ var di_contactForm = require('./dialogs/contactForm');
 
 // Starting a new conversation will trigger this message
 bot.on('conversationUpdate', 
-    function (message, session) {
+    function (message) {
         if (message.membersAdded) {
             message.membersAdded.forEach((identity) => {
             if (identity.id === message.address.bot.id) {
@@ -73,6 +73,10 @@ bot.dialog('/contactForm', di_contactForm.Dialog);
 
 intents.matches(/^version/i, function (session) {
     session.send('Bot version 0.1');
+});
+
+intents.matches(/^askName/i, function (session) {
+    session.beginDialog('/askName');
 });
 
 intents.matches(/^contactForm/i, function (session) {
