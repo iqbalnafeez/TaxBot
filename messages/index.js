@@ -115,7 +115,9 @@ intents.matches(/^qna/i, function (session) {
 
 intents.onDefault([(session) => {
         session.send("Dies kann ich Ihnen leider nicht beantworten. Bitte beachten Sie, dass dieser ChatBot auf Fragen zur Unternehmenssteuerreform III (USR III) limitiert ist.");
-        builder.Prompts.choice(session, "Darf einer unserer Steuerfachpersonen Sie diesbezüglich kontaktieren?", ['Ja', 'Nein']);
+        builder.Prompts.choice(session, "Darf einer unserer Steuerfachpersonen Sie diesbezüglich kontaktieren?", 
+            ['Ja', 'Nein'],
+            {retryPrompt: "I verstehe nicht. Bitte antworten 'ja' oder 'nein'."});
     }, 
     function (session, results) {
         if (results.response) {
