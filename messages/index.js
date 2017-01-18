@@ -49,6 +49,10 @@ var di_askName = require('./dialogs/askName');
 var di_greetUser = require('./dialogs/greetUser');
 var di_contactForm = require('./dialogs/contactForm');
 
+bot.dialog('/askName', di_askName.Dialog);
+bot.dialog('/greetUser', di_greetUser.Dialog);
+bot.dialog('/contactForm', di_contactForm.Dialog);
+
 // Starting a new conversation will trigger this message
 bot.on('conversationUpdate', 
     function (message) {
@@ -60,16 +64,16 @@ bot.on('conversationUpdate',
                     .address(message.address)
                     .text(instructions);
                 bot.send(reply);
-                bot.beginDialog(message.address, '/askName'); // fills user name
+                bot.beginDialog(message.address, '/'); // start the root dialog
             }
             });
         }
     }
 );
 
-bot.dialog('/askName', di_askName.Dialog);
-bot.dialog('/greetUser', di_greetUser.Dialog);
-bot.dialog('/contactForm', di_contactForm.Dialog);
+intents.onBegin(function (session) {
+    session.beginDialog('/askName');
+});
 
 intents.matches(/^version/i, function (session) {
     session.send('Bot version 0.1');
