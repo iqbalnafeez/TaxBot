@@ -72,6 +72,26 @@ bot.on('conversationUpdate',
 );
 
 intents.onBegin(function (session) {
+    session.privateConversationData.familyname = "";
+    session.privateConversationData.firstname = "";
+    session.privateConversationData.company = "";
+    session.privateConversationData.position = "";
+    session.privateConversationData.email = "";
+    session.privateConversationData.telephone = "";
+    session.privateConversationData.callTimes = "";
+    session.privateConversationData.other = "";
+    session.privateConversationData.canton = "";
+    session.privateConversationData.rechnungslegung = "";
+    session.privateConversationData.latenteSteuern = "";
+    session.privateConversationData.steuerStatus = "";
+    session.privateConversationData.stilleReserven = "";
+    session.privateConversationData.gewinnErwartet = "";
+    session.privateConversationData.patents = "";
+    session.privateConversationData.IP_CH = "";
+    session.privateConversationData.IP_Foreign3rdParty = "";
+    session.privateConversationData.FE_CH = "";
+    session.privateConversationData.eigenfinanzierung = "";
+    session.privateConversationData.aktivdarlehenGruppengesellschaften = "";
     if (!session.privateConversationData.username) {
         session.beginDialog('/askName');
     }
