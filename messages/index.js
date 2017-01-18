@@ -72,7 +72,9 @@ bot.on('conversationUpdate',
 );
 
 intents.onBegin(function (session) {
-    session.beginDialog('/askName');
+    if (!session.privateConversationData.username) {
+        session.beginDialog('/askName');
+    }
 });
 
 intents.matches(/^version/i, function (session) {
