@@ -16,6 +16,16 @@ var didYouMean = require("didyoumean2");
 // Dictionaries
 var qnadict = require('./dictionaries/qnadict');
 
+// Connection to a remote NoSQL database
+var documentDbOptions = {
+    host: process.env.DocumentDBHost, 
+    masterKey: process.env.DocumentDBMasterKey, 
+    database: 'botdocdb',
+    collection: 'botdata'
+};
+var docDbClient = new botbuilder_azure.DocumentDbClient(documentDbOptions);
+var tableStorage = new botbuilder_azure.AzureBotStorage({ gzipData: false }, docDbClient);
+
 var useEmulator = (process.env.NODE_ENV == 'development');
 
 var connector = useEmulator ? new builder.ChatConnector() : new botbuilder_azure.BotServiceConnector({
@@ -32,6 +42,9 @@ bot.set('localizerSettings', {
     botLocalePath: "./locale", 
     defaultLocale: "de" 
 });
+
+// Store data in an online NoSQL database
+bot.set('storage', tableStorage);
 
 // Make sure you add code to validate these fields
 var luisAppId = process.env.LuisAppId;
