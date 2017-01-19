@@ -46,12 +46,18 @@ var intents = new builder.IntentDialog({ recognizers: [recognizer] });
 
 // Dialogs
 var di_askName = require('./dialogs/askName');
+var di_askContactNames = require('./dialogs/askContactNames');
+var di_askTelephone = require('./dialogs/askTelephone');
+var di_askEmail = require('./dialogs/askEmail');
+var di_closeContactForm = require('./dialogs/closeContactForm');
 var di_greetUser = require('./dialogs/greetUser');
-var di_contactForm = require('./dialogs/contactForm');
 
 bot.dialog('/askName', di_askName.Dialog);
+bot.dialog('/askContactNames', di_askContactNames.Dialog);
+bot.dialog('/askTelephone', di_askTelephone.Dialog);
+bot.dialog('/askEmail', di_askEmail.Dialog);
+bot.dialog('/closeContactForm', di_closeContactForm.Dialog);
 bot.dialog('/greetUser', di_greetUser.Dialog);
-bot.dialog('/contactForm', di_contactForm.Dialog);
 
 // Starting a new conversation will trigger this message
 bot.on('conversationUpdate', 
@@ -96,6 +102,24 @@ intents.onBegin(function (session) {
         session.beginDialog('/askName');
     }
 });
+
+bot.dialog('/contactForm', [
+    function (session) {
+        session.beginDialog('/askContactNames');
+    },
+    function (session, results) {
+        if (results) {
+            if (results.entity=='Telefon') {
+                session.beginDialog('/askTelephone');
+            } else if (results.entity=='Email') {
+                session.beginDialog('/askEmail');
+            }
+        }
+    },
+    function (session) {
+        session.beginDialog('/closeContactForm')
+    }
+]);
 
 intents.matches(/^version/i, function (session) {
     session.send('Bot version 0.1');
