@@ -17,7 +17,10 @@ module.exports = {
         },
         function (session, results, next) {
             if (results.response) {
-                session.send('Have response');
+                if (results.response.entity = "Ja") {
+                    // email summary action triggered
+                    session.send("(Noch nicht implementiert...)"); // TODO
+                }
                 next();
             }
         },
