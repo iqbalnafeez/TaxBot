@@ -65,7 +65,6 @@ var di_askTelephone = require('./dialogs/askTelephone');
 var di_askEmail = require('./dialogs/askEmail');
 var di_closeContactForm = require('./dialogs/closeContactForm');
 var di_greetUser = require('./dialogs/greetUser');
-var di_usr3dictQuestion = require('./dialogs/usr3dictQuestion');
 
 bot.dialog('/askName', di_askName.Dialog);
 bot.dialog('/askContactNames', di_askContactNames.Dialog);
@@ -73,7 +72,6 @@ bot.dialog('/askTelephone', di_askTelephone.Dialog);
 bot.dialog('/askEmail', di_askEmail.Dialog);
 bot.dialog('/closeContactForm', di_closeContactForm.Dialog);
 bot.dialog('/greetUser', di_greetUser.Dialog);
-bot.dialog('/usr3dictQuestion', di_usr3dictQuestion.Dialog);
 
 // Starting a new conversation will trigger this message
 bot.on('conversationUpdate', 
