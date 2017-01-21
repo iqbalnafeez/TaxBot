@@ -64,6 +64,7 @@ var di_askName = require('./dialogs/askName');
 var di_askContactNames = require('./dialogs/askContactNames');
 var di_askTelephone = require('./dialogs/askTelephone');
 var di_askEmail = require('./dialogs/askEmail');
+var di_askCanton = require('./dialogs/askCanton');
 var di_closeContactForm = require('./dialogs/closeContactForm');
 var di_greetUser = require('./dialogs/greetUser');
 
@@ -72,6 +73,7 @@ bot.dialog('/askName', di_askName.Dialog);
 bot.dialog('/askContactNames', di_askContactNames.Dialog);
 bot.dialog('/askTelephone', di_askTelephone.Dialog);
 bot.dialog('/askEmail', di_askEmail.Dialog);
+bot.dialog('/askCanton', di_askCanton.Dialog);
 bot.dialog('/closeContactForm', di_closeContactForm.Dialog);
 bot.dialog('/greetUser', di_greetUser.Dialog);
 
