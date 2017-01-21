@@ -59,6 +59,7 @@ var recognizer = new builder.LuisRecognizer(LuisModelUrl);
 var intents = new builder.IntentDialog({ recognizers: [recognizer] });
 
 // Dialogs
+var di_askGenericYesNo = require('./dialogs/askGenericYesNo');
 var di_askName = require('./dialogs/askName');
 var di_askContactNames = require('./dialogs/askContactNames');
 var di_askTelephone = require('./dialogs/askTelephone');
@@ -66,6 +67,7 @@ var di_askEmail = require('./dialogs/askEmail');
 var di_closeContactForm = require('./dialogs/closeContactForm');
 var di_greetUser = require('./dialogs/greetUser');
 
+bot.dialog('/askGenericYesNo', di_askGenericYesNo.Dialog);
 bot.dialog('/askName', di_askName.Dialog);
 bot.dialog('/askContactNames', di_askContactNames.Dialog);
 bot.dialog('/askTelephone', di_askTelephone.Dialog);
