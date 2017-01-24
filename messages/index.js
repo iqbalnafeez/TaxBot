@@ -11,6 +11,7 @@ require('dotenv-extended').load();
 
 var builder = require("botbuilder");
 var botbuilder_azure = require("botbuilder-azure");
+var azure = require('azure-storage');
 var didYouMean = require("didyoumean2");
 
 // Dictionaries
@@ -18,19 +19,16 @@ var qnadict = require('./dictionaries/qnadict');
 var usr3questions = require('./dictionaries/usr3questions');
 
 // Connection to a remote NoSQL database
-// var documentDbOptions = {
-//     host: process.env.DocumentDBHost, 
-//     masterKey: process.env.DocumentDBMasterKey, 
-//     database: 'botdocdb',
-//     collection: 'botdata'
-// };
-// var docDbClient = new botbuilder_azure.DocumentDbClient(documentDbOptions);
-// var tableStorage = new botbuilder_azure.AzureBotStorage({ gzipData: false }, docDbClient);
-
 // Azure Table Storage
 var tableName = 'TaxBotStore';
-var azureTableClient = new botbuilder_azure.AzureTableClient(tableName);
-var tableStorage = new botbuilder_azure.AzureBotStorage({ gzipData: false }, azureTableClient);
+var tableSvc = azure.createTableService();
+tableSvc.createTableIfNotExists(tableName, function(error, result, response){
+  if(!error){
+    // Table exists or created
+  }
+});
+
+var entGen = azure.TableUtilities.entityGenerator;
 
 var useEmulator = (process.env.NODE_ENV == 'development');
 
