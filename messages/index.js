@@ -47,9 +47,6 @@ bot.set('localizerSettings', {
     defaultLocale: "de" 
 });
 
-// Store data in an online NoSQL database
-bot.set('storage', tableStorage);
-
 // Make sure you add code to validate these fields
 var luisAppId = process.env.LuisAppId;
 var luisAPIKey = process.env.LuisAPIKey;
