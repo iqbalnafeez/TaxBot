@@ -18,14 +18,19 @@ var qnadict = require('./dictionaries/qnadict');
 var usr3questions = require('./dictionaries/usr3questions');
 
 // Connection to a remote NoSQL database
-var documentDbOptions = {
-    host: process.env.DocumentDBHost, 
-    masterKey: process.env.DocumentDBMasterKey, 
-    database: 'botdocdb',
-    collection: 'botdata'
-};
-var docDbClient = new botbuilder_azure.DocumentDbClient(documentDbOptions);
-var tableStorage = new botbuilder_azure.AzureBotStorage({ gzipData: false }, docDbClient);
+// var documentDbOptions = {
+//     host: process.env.DocumentDBHost, 
+//     masterKey: process.env.DocumentDBMasterKey, 
+//     database: 'botdocdb',
+//     collection: 'botdata'
+// };
+// var docDbClient = new botbuilder_azure.DocumentDbClient(documentDbOptions);
+// var tableStorage = new botbuilder_azure.AzureBotStorage({ gzipData: false }, docDbClient);
+
+// Azure Table Storage
+var tableName = 'TaxBotStore';
+var azureTableClient = new botbuilder_azure.AzureTableClient(tableName);
+var tableStorage = new botbuilder_azure.AzureBotStorage({ gzipData: false }, azureTableClient);
 
 var useEmulator = (process.env.NODE_ENV == 'development');
 
