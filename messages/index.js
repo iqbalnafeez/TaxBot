@@ -138,6 +138,37 @@ bot.dialog('/contactForm', [
     },
     function (session) {
         session.beginDialog('/closeContactForm')
+    },
+        function(session){
+        row = {
+            PartitionKey: entGen.String(session.message.user.id),
+            RowKey: entGen.String(session.message.address.conversation.id),
+            familyname: entGen.String(session.privateConversationData.familyname),
+            firstname: entGen.String(session.privateConversationData.firstname),
+            compary: entGen.String(session.privateConversationData.company),
+            position: entGen.String(session.privateConversationData.position),
+            email: entGen.String(session.privateConversationData.email),
+            telephone: entGen.String(session.privateConversationData.telephone),
+            callTimes: entGen.String(session.privateConversationData.callTimes),
+            other: entGen.String(session.privateConversationData.other),
+            canton: entGen.String(session.privateConversationData.canton),
+            holding: entGen.String(session.privateConversationData.usr3questions.holding),
+            stilleReserven: entGen.String(session.privateConversationData.usr3questions.stilleReserven),
+            patents: entGen.String(session.privateConversationData.usr3questions.patents),
+            IP_CH: entGen.String(session.privateConversationData.usr3questions.IP_CH),
+            eigenfinanzierung: entGen.String(session.privateConversationData.usr3questions.eigenfinanzierung),
+            FE_CH: entGen.String(session.privateConversationData.usr3questions.FE_CH),
+            IP_Foreign3rdParty: entGen.String(session.privateConversationData.usr3questions.IP_Foreign3rdParty),
+            vermoegen: entGen.String(session.privateConversationData.usr3questions.vermoegen)
+        };
+        tableSvc.insertEntity(tableName, row, function (error, result, response) {
+            if(!error){
+                // Entity inserted
+                console.log("Successfully inserted contact details");
+            } else {
+                console.log("Could not insert contact details");
+            }
+        });
     }
 ]);
 
