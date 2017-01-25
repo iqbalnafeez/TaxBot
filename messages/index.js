@@ -104,20 +104,10 @@ intents.onBegin(function (session) {
     session.privateConversationData.callTimes = "";
     session.privateConversationData.other = "";
     session.privateConversationData.canton = "";
-    //session.privateConversationData.holding = "";
-    //session.privateConversationData.rechnungslegung = "";
-    //session.privateConversationData.latenteSteuern = "";
-    //session.privateConversationData.steuerStatus = "";
-    //session.privateConversationData.stilleReserven = "";
-    //session.privateConversationData.gewinnErwartet = "";
-    //session.privateConversationData.patents = "";
-    //session.privateConversationData.IP_CH = "";
-    //session.privateConversationData.IP_Foreign3rdParty = "";
-    //session.privateConversationData.FE_CH = "";
-    //session.privateConversationData.eigenfinanzierung = "";
-    //session.privateConversationData.beteiligungenVermögen = "";
-    //session.privateConversationData.aktivdarlehenGruppengesellschaften = "";
     session.privateConversationData.usr3questions = {};
+    Object.keys(usr3questions).forEach(function (key) {
+        session.privateConversationData.usr3questions[key] = "";
+    });
     if (!session.privateConversationData.username) {
         session.beginDialog('/askName');
     }
@@ -137,15 +127,15 @@ bot.dialog('/contactForm', [
         }
     },
     function (session) {
-        session.beginDialog('/closeContactForm')
+        session.beginDialog('/closeContactForm');
     },
-        function(session){
-        row = {
+    function(session){
+        var row = {
             PartitionKey: entGen.String(session.message.user.id),
             RowKey: entGen.String(session.message.address.conversation.id),
             familyname: entGen.String(session.privateConversationData.familyname),
             firstname: entGen.String(session.privateConversationData.firstname),
-            compary: entGen.String(session.privateConversationData.company),
+            company: entGen.String(session.privateConversationData.company),
             position: entGen.String(session.privateConversationData.position),
             email: entGen.String(session.privateConversationData.email),
             telephone: entGen.String(session.privateConversationData.telephone),
@@ -165,6 +155,7 @@ bot.dialog('/contactForm', [
             if(!error){
                 // Entity inserted
                 console.log("Successfully inserted contact details");
+                console.log(row);
             } else {
                 console.log("Could not insert contact details");
             }
