@@ -1,6 +1,10 @@
 module.exports = {
+    rechnungslegungIFRS: "rechnungslegungIFRS?",
+    latenteSteuern: "latenteSteuern",
+    aktivdarlehen: "Aktivdarlehen gegen Nahestehenden vorhanden?",
     holding: "Wird Ihr Unternehmen aktuell als Holding, Gemischte order Verwaltungsgesellschaft besteuert?",
     stilleReserven: "Hat ihr Unternehmen aktuell stille Reserven (inkl. Goodwill)?",
+    stilleReservenGewinn: "stilleReservenGewinn?",
     patents: "Erziehlt Ihr Unternehmen aktuell oder zukünftig Einkommen aus IP (Patent, Software oder ähnlichem)?",
     IP_CH: "Wird/Wurde das IP in der Schweiz entwickelt?",
     eigenfinanzierung: "Ist Ihr Unternehmen überdurchschnittlich mit Eigenkapital finanziert?",

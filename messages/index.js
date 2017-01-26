@@ -17,6 +17,7 @@ var didYouMean = require("didyoumean2");
 // Dictionaries
 var qnadict = require('./dictionaries/qnadict');
 var usr3questions = require('./dictionaries/usr3questions');
+var usr3answers = require('./dictionaries/usr3answers');
 
 // Connection to a remote NoSQL database
 // Azure Table Storage
@@ -95,20 +96,25 @@ bot.on('conversationUpdate',
 );
 
 intents.onBegin(function (session) {
-    session.privateConversationData.familyname = "";
-    session.privateConversationData.firstname = "";
-    session.privateConversationData.company = "";
-    session.privateConversationData.position = "";
-    session.privateConversationData.email = "";
-    session.privateConversationData.telephone = "";
-    session.privateConversationData.callTimes = "";
-    session.privateConversationData.other = "";
-    session.privateConversationData.canton = "";
-    session.privateConversationData.usr3questions = {};
-    Object.keys(usr3questions).forEach(function (key) {
-        session.privateConversationData.usr3questions[key] = "";
-    });
-    if (!session.privateConversationData.username) {
+    if (!session.privateConversationData.existingSession) {
+        session.privateConversationData.existingSession = true;
+        session.privateConversationData.familyname = "";
+        session.privateConversationData.firstname = "";
+        session.privateConversationData.company = "";
+        session.privateConversationData.position = "";
+        session.privateConversationData.email = "";
+        session.privateConversationData.telephone = "";
+        session.privateConversationData.callTimes = "";
+        session.privateConversationData.other = "";
+        session.privateConversationData.canton = "";
+        session.privateConversationData.usr3questions = {};
+        session.privateConversationData.usr3answers = {};
+        Object.keys(usr3questions).forEach(function (key) {
+            session.privateConversationData.usr3questions[key] = "";
+        });
+        Object.keys(usr3answers).forEach(function (key) {
+            session.privateConversationData.usr3answers[key] = {presented: false, active: false};
+        });
         session.beginDialog('/askName');
     }
 });
@@ -163,11 +169,207 @@ bot.dialog('/contactForm', [
     }
 ]);
 
-bot.dialog('/EffectsOfUSR3Reply', [
-    function (session, args) {
-        session.send('Smart expert reply triggered:');
-        session.send(args.answer);
+bot.dialog('/replyUSR3', [
+    function (session) {
+        var key = 'ordSteuersaetze';
+        if (session.privateConversationData.canton
+            && !session.privateConversationData.usr3answers[key].presented) {
+            session.send(usr3answers[key]);
+            session.privateConversationData.usr3answers[key].active = true;
+            session.privateConversationData.usr3answers[key].presented = true;
+        };
+        var key = 'auswirkungLatenteSteuern';
+        if (session.privateConversationData.usr3questions.rechnungslegungIFRS 
+            && session.privateConversationData.usr3questions.latenteSteuern
+            && !session.privateConversationData.usr3answers[key].presented) {
+            session.send(usr3answers[key]);
+            session.privateConversationData.usr3answers[key].active = true;
+            session.privateConversationData.usr3answers[key].presented = true;
+        };
+        var key = 'altrechtlicherStepup';
+        if (session.privateConversationData.usr3questions.holding 
+            && session.privateConversationData.usr3questions.stilleReserven
+            && !session.privateConversationData.usr3answers[key].presented) {
+            session.send(usr3answers[key]);
+            session.privateConversationData.usr3answers[key].active = true;
+            session.privateConversationData.usr3answers[key].presented = true;
+        };
+        var key = 'neurechtlicherStepup';
+        if (session.privateConversationData.usr3questions.holding 
+            && session.privateConversationData.usr3questions.stilleReserven
+            && !session.privateConversationData.usr3questions.stilleReservenGewinn
+            && !session.privateConversationData.usr3answers[key].presented) {
+            session.send(usr3answers[key]);
+            session.privateConversationData.usr3answers[key].active = true;
+            session.privateConversationData.usr3answers[key].presented = true;
+        };
+        var key = 'patentbox';
+        if (session.privateConversationData.usr3questions.patents 
+            && (session.privateConversationData.usr3questions.IP_CH || session.privateConversationData.usr3questions.IP_Foreign3rdParty)
+            && !session.privateConversationData.usr3answers[key].presented) {
+            session.send(usr3answers[key]);
+            session.privateConversationData.usr3answers[key].active = true;
+            session.privateConversationData.usr3answers[key].presented = true;
+        };
+        var key = 'feMehrfachabzug';
+        if (session.privateConversationData.usr3questions.FE_CH 
+            && !session.privateConversationData.usr3answers[key].presented) {
+            session.send(usr3answers[key]);
+            session.privateConversationData.usr3answers[key].active = true;
+            session.privateConversationData.usr3answers[key].presented = true;
+        };
+        var key = 'nidSpecial';
+        if (session.privateConversationData.usr3questions.eigenfinanzierung 
+            && !session.privateConversationData.usr3questions.vermoegen
+            && session.privateConversationData.usr3questions.aktivdarlehen
+            && !session.privateConversationData.usr3answers[key].presented) {
+            session.send(usr3answers[key]);
+            session.privateConversationData.usr3answers[key].active = true;
+            session.privateConversationData.usr3answers[key].presented = true;
+        };
+        var key = 'nidCommon';
+        if (session.privateConversationData.usr3questions.eigenfinanzierung 
+            && !session.privateConversationData.usr3questions.vermoegen
+            && !session.privateConversationData.usr3questions.aktivdarlehen
+            && !session.privateConversationData.usr3answers[key].presented) {
+            session.send(usr3answers[key]);
+            session.privateConversationData.usr3answers[key].active = true;
+            session.privateConversationData.usr3answers[key].presented = true;
+        };
+        var key = 'erleichtungKapitalsteuer';
+        if ( session.privateConversationData.usr3questions.patents
+            || (session.privateConversationData.usr3questions.eigenfinanzierung && session.privateConversationData.usr3questions.vermoegen)
+            && !session.privateConversationData.usr3answers[key].presented) {
+            session.send(usr3answers[key]);
+            session.privateConversationData.usr3answers[key].active = true;
+            session.privateConversationData.usr3answers[key].presented = true;
+        };
         session.endDialog();
+    }
+]);
+
+bot.dialog('/askUSR3Questions', [
+    function (session) {
+        if (!session.privateConversationData.canton) {
+            session.beginDialog('/askCanton');
+        }
+    },
+    function (session) {
+        session.privateConversationData.currentQuestionKey = "rechnungslegungIFRS";
+        if (!session.privateConversationData.usr3questions[session.privateConversationData.currentQuestionKey]) {
+            session.beginDialog('/askGenericYesNo', {key: session.privateConversationData.currentQuestionKey, 
+                prompt: usr3questions[session.privateConversationData.currentQuestionKey]});
+        }
+    },
+    function (session) {
+        session.privateConversationData.currentQuestionKey = "latenteSteuern";
+        if (!session.privateConversationData.usr3questions[session.privateConversationData.currentQuestionKey]) {
+            session.beginDialog('/askGenericYesNo', {key: session.privateConversationData.currentQuestionKey, 
+                prompt: usr3questions[session.privateConversationData.currentQuestionKey]});
+        }
+    },
+    function (session) {
+        session.beginDialog('/replyUSR3');
+    }, 
+    function (session) {
+        session.beginDialog('/askUSR3StepUpQuestions');
+    },
+    function (session) {
+        session.beginDialog('/replyUSR3');
+    }, 
+    function (session) {        
+        session.beginDialog('/askUSR3IPQuestions');
+    },
+    function (session) {
+        session.beginDialog('/replyUSR3');        
+    }, 
+    function (session) {        
+        session.beginDialog('/askUSR3NIDQuestions');
+    }, 
+    function (session) {
+        session.beginDialog('/replyUSR3');
+    }, 
+    function (session) {        
+        session.endDialog();
+    }
+]);
+
+bot.dialog('/askUSR3StepUpQuestions', [
+    function (session) {
+        session.privateConversationData.currentQuestionKey = "holding";
+        if (!session.privateConversationData.usr3questions[session.privateConversationData.currentQuestionKey]) {
+            session.beginDialog('/askGenericYesNo', {key: session.privateConversationData.currentQuestionKey, 
+                prompt: usr3questions[session.privateConversationData.currentQuestionKey]});
+        }
+    },
+    function (session) {
+        session.privateConversationData.currentQuestionKey = "stilleReserven";
+        if (!session.privateConversationData.usr3questions[session.privateConversationData.currentQuestionKey]) {
+            session.beginDialog('/askGenericYesNo', {key: session.privateConversationData.currentQuestionKey, 
+                prompt: usr3questions[session.privateConversationData.currentQuestionKey]});
+        }
+    },
+    function (session) {
+        session.privateConversationData.currentQuestionKey = "stilleReservenGewinn";
+        if (!session.privateConversationData.usr3questions[session.privateConversationData.currentQuestionKey]) {
+            session.beginDialog('/askGenericYesNo', {key: session.privateConversationData.currentQuestionKey, 
+                prompt: usr3questions[session.privateConversationData.currentQuestionKey]});
+        }
+    }
+]);
+
+bot.dialog('/askUSR3IPQuestions', [
+    function (session) {
+        session.privateConversationData.currentQuestionKey = "patents";
+        if (!session.privateConversationData.usr3questions[session.privateConversationData.currentQuestionKey]) {
+            session.beginDialog('/askGenericYesNo', {key: session.privateConversationData.currentQuestionKey, 
+                prompt: usr3questions[session.privateConversationData.currentQuestionKey]});
+        }
+    },  
+    function (session) {
+        session.privateConversationData.currentQuestionKey = "IP_CH";
+        if (!session.privateConversationData.usr3questions[session.privateConversationData.currentQuestionKey]) {
+            session.beginDialog('/askGenericYesNo', {key: session.privateConversationData.currentQuestionKey, 
+                prompt: usr3questions[session.privateConversationData.currentQuestionKey]});
+        }
+    },  
+    function (session) {
+        session.privateConversationData.currentQuestionKey = "IP_Foreign3rdParty";
+        if (!session.privateConversationData.usr3questions[session.privateConversationData.currentQuestionKey]) {
+            session.beginDialog('/askGenericYesNo', {key: session.privateConversationData.currentQuestionKey, 
+                prompt: usr3questions[session.privateConversationData.currentQuestionKey]});
+        }
+    },
+    function (session) {
+        session.privateConversationData.currentQuestionKey = "FE_CH";
+        if (!session.privateConversationData.usr3questions[session.privateConversationData.currentQuestionKey]) {
+            session.beginDialog('/askGenericYesNo', {key: session.privateConversationData.currentQuestionKey, 
+                prompt: usr3questions[session.privateConversationData.currentQuestionKey]});
+        }
+    }  
+]);
+
+bot.dialog('/askUSR3NIDQuestions', [
+    function (session) {
+        session.privateConversationData.currentQuestionKey = "eigenfinanzierung";
+        if (!session.privateConversationData.usr3questions[session.privateConversationData.currentQuestionKey]) {
+            session.beginDialog('/askGenericYesNo', {key: session.privateConversationData.currentQuestionKey, 
+                prompt: usr3questions[session.privateConversationData.currentQuestionKey]});
+        }
+    },  
+    function (session) {
+        session.privateConversationData.currentQuestionKey = "vermoegen";
+        if (!session.privateConversationData.usr3questions[session.privateConversationData.currentQuestionKey]) {
+            session.beginDialog('/askGenericYesNo', {key: session.privateConversationData.currentQuestionKey, 
+                prompt: usr3questions[session.privateConversationData.currentQuestionKey]});
+        }
+    },  
+    function (session) {
+        session.privateConversationData.currentQuestionKey = "aktivdarlehen";
+        if (!session.privateConversationData.usr3questions[session.privateConversationData.currentQuestionKey]) {
+            session.beginDialog('/askGenericYesNo', {key: session.privateConversationData.currentQuestionKey, 
+                prompt: usr3questions[session.privateConversationData.currentQuestionKey]});
+        }
     }
 ]);
 
@@ -205,118 +407,8 @@ intents.matches('QnA', [
 
 // Trigger example: Welche auswirkungen hat die USRIII auf mein Unternehmen
 intents.matches('EffectsOfUSR3', [
-    function (session, next) {
-        if (!session.privateConversationData.canton) {
-            session.beginDialog('/askCanton');
-        } else {
-            next();
-        }
-    },
-    function (session, next) {
-        session.privateConversationData.currentQuestionKey = "holding";
-        if (!session.privateConversationData.usr3questions[session.privateConversationData.currentQuestionKey]) {
-            session.beginDialog('/askGenericYesNo', {key: session.privateConversationData.currentQuestionKey, 
-                prompt: usr3questions[session.privateConversationData.currentQuestionKey]});
-        } else { 
-            next();
-        }
-    },
-    function (session, next) {
-        session.privateConversationData.currentQuestionKey = "stilleReserven";
-        if (!session.privateConversationData.usr3questions[session.privateConversationData.currentQuestionKey]) {
-            session.beginDialog('/askGenericYesNo', {key: session.privateConversationData.currentQuestionKey, 
-                prompt: usr3questions[session.privateConversationData.currentQuestionKey]});
-        } else { 
-            next();
-        }
-        console.log(session.privateConversationData.usr3questions);
-    },
-    function (session, next) {
-        if (session.privateConversationData.usr3questions.holding && session.privateConversationData.usr3questions.stilleReserven) {
-            session.replaceDialog('/EffectsOfUSR3Reply', {answer: "Step-up"});
-        } else {
-            session.privateConversationData.currentQuestionKey = "patents";
-            if (!session.privateConversationData.usr3questions[session.privateConversationData.currentQuestionKey]) {
-                session.beginDialog('/askGenericYesNo', {key: session.privateConversationData.currentQuestionKey, 
-                    prompt: usr3questions[session.privateConversationData.currentQuestionKey]});
-            } else { 
-                next();
-            }
-            console.log(session.privateConversationData.usr3questions);
-        }
-    },
-    function (session, next) {
-        if (session.privateConversationData.usr3questions.patents) {
-            session.replaceDialog('/EffectsOfUSR3Reply', {answer: "Erleichtung Kapitalsteuer"});
-        } else {
-            session.privateConversationData.currentQuestionKey = "IP_CH";
-            if (!session.privateConversationData.usr3questions[session.privateConversationData.currentQuestionKey]) {
-                session.beginDialog('/askGenericYesNo', {key: session.privateConversationData.currentQuestionKey, 
-                    prompt: usr3questions[session.privateConversationData.currentQuestionKey]});
-            } else { 
-                next();
-            }
-            console.log(session.privateConversationData.usr3questions);
-        }
-    },
-    function (session, next) {
-        if (session.privateConversationData.usr3questions.IP_CH) {
-            session.replaceDialog('/EffectsOfUSR3Reply', {answer: "Patentbox"});
-        } else {
-            session.privateConversationData.currentQuestionKey = "IP_Foreign3rdParty";
-            if (!session.privateConversationData.usr3questions[session.privateConversationData.currentQuestionKey]) {
-                session.beginDialog('/askGenericYesNo', {key: session.privateConversationData.currentQuestionKey, 
-                    prompt: usr3questions[session.privateConversationData.currentQuestionKey]});
-            } else { 
-                next();
-            }
-            console.log(session.privateConversationData.usr3questions);
-        }
-    },
-    function (session, next) {
-        if (session.privateConversationData.usr3questions.IP_Foreign3rdParty) {
-            session.replaceDialog('/EffectsOfUSR3Reply', {answer: "Patentbox"});
-        } else {
-            session.privateConversationData.currentQuestionKey = "FE_CH";
-            if (!session.privateConversationData.usr3questions[session.privateConversationData.currentQuestionKey]) {
-                session.beginDialog('/askGenericYesNo', {key: session.privateConversationData.currentQuestionKey, 
-                    prompt: usr3questions[session.privateConversationData.currentQuestionKey]});
-            } else { 
-                next();
-            }
-            console.log(session.privateConversationData.usr3questions);
-        }
-    },
-    function (session, next) {
-        if (session.privateConversationData.usr3questions.FE_CH) {
-            session.replaceDialog('/EffectsOfUSR3Reply', {answer: "F&E-Mehrfachabzug"});
-        } else {
-            session.privateConversationData.currentQuestionKey = "eigenfinanzierung";
-            if (!session.privateConversationData.usr3questions[session.privateConversationData.currentQuestionKey]) {
-                session.beginDialog('/askGenericYesNo', {key: session.privateConversationData.currentQuestionKey, 
-                    prompt: usr3questions[session.privateConversationData.currentQuestionKey]});
-            } else { 
-                next();
-            }
-            console.log(session.privateConversationData.usr3questions);
-        }
-    },
-    function (session, next) {
-        session.privateConversationData.currentQuestionKey = "vermoegen";
-        if (!session.privateConversationData.usr3questions[session.privateConversationData.currentQuestionKey]) {
-            session.beginDialog('/askGenericYesNo', {key: session.privateConversationData.currentQuestionKey, 
-                prompt: usr3questions[session.privateConversationData.currentQuestionKey]});
-        } else { 
-            next();
-        }
-        console.log(session.privateConversationData.usr3questions);
-    },
     function (session) {
-        if (session.privateConversationData.usr3questions.vermoegen) {
-            session.replaceDialog('/EffectsOfUSR3Reply', {answer: "Erleichterung Kapitalsteuer"});
-        } else {
-            session.replaceDialog('/EffectsOfUSR3Reply', {answer: "NID"});
-        }
+        session.beginDialog('/askUSR3Questions');
     }
 ]);
 
