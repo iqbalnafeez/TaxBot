@@ -5,7 +5,7 @@ module.exports = {
     Label: 'Ask Generic Yes No',
     Dialog: [
         function (session, args) {
-            if (session.privateConversationData.usr3questions[session.privateConversationData.currentQuestionKey]) {
+            if (session.privateConversationData.usr3questions[session.privateConversationData.currentQuestionKey] !== '') {
                 session.endDialog();
             } else {
                 builder.Prompts.choice(session, args.prompt,
