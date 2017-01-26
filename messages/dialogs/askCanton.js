@@ -5,7 +5,11 @@ module.exports = {
     Label: 'Ask canton',
     Dialog: [
         function (session) {
-            builder.Prompts.text(session, 'In welchem Kanton ist Ihr Unternehmen ansässig?');
+            if (session.privateConversationData.canton) {
+                session.endDialog();
+            } else {
+                builder.Prompts.text(session, 'In welchem Kanton ist Ihr Unternehmen ansässig?');
+            }
         },
         function (session, results) {
             if (results.response) {

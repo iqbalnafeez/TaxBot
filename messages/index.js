@@ -116,6 +116,8 @@ intents.onBegin(function (session) {
             session.privateConversationData.usr3answers[key] = {presented: false, active: false};
         });
         session.beginDialog('/askName');
+    } else {
+        session.send("Was mehr möcten Sie im Zusammenhang mit der USR III wissen?");
     }
 });
 
@@ -250,23 +252,17 @@ bot.dialog('/replyUSR3', [
 
 bot.dialog('/askUSR3Questions', [
     function (session) {
-        if (!session.privateConversationData.canton) {
-            session.beginDialog('/askCanton');
-        }
+        session.beginDialog('/askCanton');
     },
     function (session) {
         session.privateConversationData.currentQuestionKey = "rechnungslegungIFRS";
-        if (!session.privateConversationData.usr3questions[session.privateConversationData.currentQuestionKey]) {
-            session.beginDialog('/askGenericYesNo', {key: session.privateConversationData.currentQuestionKey, 
-                prompt: usr3questions[session.privateConversationData.currentQuestionKey]});
-        }
+        session.beginDialog('/askGenericYesNo', {key: session.privateConversationData.currentQuestionKey, 
+            prompt: usr3questions[session.privateConversationData.currentQuestionKey]});
     },
     function (session) {
         session.privateConversationData.currentQuestionKey = "latenteSteuern";
-        if (!session.privateConversationData.usr3questions[session.privateConversationData.currentQuestionKey]) {
-            session.beginDialog('/askGenericYesNo', {key: session.privateConversationData.currentQuestionKey, 
-                prompt: usr3questions[session.privateConversationData.currentQuestionKey]});
-        }
+        session.beginDialog('/askGenericYesNo', {key: session.privateConversationData.currentQuestionKey, 
+            prompt: usr3questions[session.privateConversationData.currentQuestionKey]});
     },
     function (session) {
         session.beginDialog('/replyUSR3');
@@ -290,86 +286,66 @@ bot.dialog('/askUSR3Questions', [
         session.beginDialog('/replyUSR3');
     }, 
     function (session) {        
-        session.endDialog();
+        session.replaceDialog('/');
     }
 ]);
 
 bot.dialog('/askUSR3StepUpQuestions', [
     function (session) {
         session.privateConversationData.currentQuestionKey = "holding";
-        if (!session.privateConversationData.usr3questions[session.privateConversationData.currentQuestionKey]) {
-            session.beginDialog('/askGenericYesNo', {key: session.privateConversationData.currentQuestionKey, 
-                prompt: usr3questions[session.privateConversationData.currentQuestionKey]});
-        }
+        session.beginDialog('/askGenericYesNo', {key: session.privateConversationData.currentQuestionKey, 
+            prompt: usr3questions[session.privateConversationData.currentQuestionKey]});
     },
     function (session) {
         session.privateConversationData.currentQuestionKey = "stilleReserven";
-        if (!session.privateConversationData.usr3questions[session.privateConversationData.currentQuestionKey]) {
-            session.beginDialog('/askGenericYesNo', {key: session.privateConversationData.currentQuestionKey, 
-                prompt: usr3questions[session.privateConversationData.currentQuestionKey]});
-        }
+        session.beginDialog('/askGenericYesNo', {key: session.privateConversationData.currentQuestionKey, 
+            prompt: usr3questions[session.privateConversationData.currentQuestionKey]});
     },
     function (session) {
         session.privateConversationData.currentQuestionKey = "stilleReservenGewinn";
-        if (!session.privateConversationData.usr3questions[session.privateConversationData.currentQuestionKey]) {
-            session.beginDialog('/askGenericYesNo', {key: session.privateConversationData.currentQuestionKey, 
-                prompt: usr3questions[session.privateConversationData.currentQuestionKey]});
-        }
+        session.beginDialog('/askGenericYesNo', {key: session.privateConversationData.currentQuestionKey, 
+            prompt: usr3questions[session.privateConversationData.currentQuestionKey]});
     }
 ]);
 
 bot.dialog('/askUSR3IPQuestions', [
     function (session) {
         session.privateConversationData.currentQuestionKey = "patents";
-        if (!session.privateConversationData.usr3questions[session.privateConversationData.currentQuestionKey]) {
-            session.beginDialog('/askGenericYesNo', {key: session.privateConversationData.currentQuestionKey, 
-                prompt: usr3questions[session.privateConversationData.currentQuestionKey]});
-        }
+        session.beginDialog('/askGenericYesNo', {key: session.privateConversationData.currentQuestionKey, 
+            prompt: usr3questions[session.privateConversationData.currentQuestionKey]});
     },  
     function (session) {
         session.privateConversationData.currentQuestionKey = "IP_CH";
-        if (!session.privateConversationData.usr3questions[session.privateConversationData.currentQuestionKey]) {
-            session.beginDialog('/askGenericYesNo', {key: session.privateConversationData.currentQuestionKey, 
-                prompt: usr3questions[session.privateConversationData.currentQuestionKey]});
-        }
+        session.beginDialog('/askGenericYesNo', {key: session.privateConversationData.currentQuestionKey, 
+            prompt: usr3questions[session.privateConversationData.currentQuestionKey]});
     },  
     function (session) {
         session.privateConversationData.currentQuestionKey = "IP_Foreign3rdParty";
-        if (!session.privateConversationData.usr3questions[session.privateConversationData.currentQuestionKey]) {
-            session.beginDialog('/askGenericYesNo', {key: session.privateConversationData.currentQuestionKey, 
-                prompt: usr3questions[session.privateConversationData.currentQuestionKey]});
-        }
+        session.beginDialog('/askGenericYesNo', {key: session.privateConversationData.currentQuestionKey, 
+            prompt: usr3questions[session.privateConversationData.currentQuestionKey]});
     },
     function (session) {
         session.privateConversationData.currentQuestionKey = "FE_CH";
-        if (!session.privateConversationData.usr3questions[session.privateConversationData.currentQuestionKey]) {
-            session.beginDialog('/askGenericYesNo', {key: session.privateConversationData.currentQuestionKey, 
-                prompt: usr3questions[session.privateConversationData.currentQuestionKey]});
-        }
+        session.beginDialog('/askGenericYesNo', {key: session.privateConversationData.currentQuestionKey, 
+            prompt: usr3questions[session.privateConversationData.currentQuestionKey]});
     }  
 ]);
 
 bot.dialog('/askUSR3NIDQuestions', [
     function (session) {
         session.privateConversationData.currentQuestionKey = "eigenfinanzierung";
-        if (!session.privateConversationData.usr3questions[session.privateConversationData.currentQuestionKey]) {
-            session.beginDialog('/askGenericYesNo', {key: session.privateConversationData.currentQuestionKey, 
-                prompt: usr3questions[session.privateConversationData.currentQuestionKey]});
-        }
+        session.beginDialog('/askGenericYesNo', {key: session.privateConversationData.currentQuestionKey, 
+            prompt: usr3questions[session.privateConversationData.currentQuestionKey]});
     },  
     function (session) {
         session.privateConversationData.currentQuestionKey = "vermoegen";
-        if (!session.privateConversationData.usr3questions[session.privateConversationData.currentQuestionKey]) {
-            session.beginDialog('/askGenericYesNo', {key: session.privateConversationData.currentQuestionKey, 
-                prompt: usr3questions[session.privateConversationData.currentQuestionKey]});
-        }
+        session.beginDialog('/askGenericYesNo', {key: session.privateConversationData.currentQuestionKey, 
+            prompt: usr3questions[session.privateConversationData.currentQuestionKey]});
     },  
     function (session) {
         session.privateConversationData.currentQuestionKey = "aktivdarlehen";
-        if (!session.privateConversationData.usr3questions[session.privateConversationData.currentQuestionKey]) {
-            session.beginDialog('/askGenericYesNo', {key: session.privateConversationData.currentQuestionKey, 
-                prompt: usr3questions[session.privateConversationData.currentQuestionKey]});
-        }
+        session.beginDialog('/askGenericYesNo', {key: session.privateConversationData.currentQuestionKey, 
+            prompt: usr3questions[session.privateConversationData.currentQuestionKey]});
     }
 ]);
 
