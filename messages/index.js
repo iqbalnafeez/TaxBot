@@ -99,6 +99,7 @@ bot.on('conversationUpdate',
 intents.onBegin(function (session) {
     if (!session.privateConversationData.existingSession) {
         session.privateConversationData.existingSession = true;
+        session.privateConversationData.usr3dialogPresented = false;
         session.privateConversationData.familyname = "";
         session.privateConversationData.firstname = "";
         session.privateConversationData.company = "";
@@ -253,6 +254,7 @@ bot.dialog('/replyUSR3', [
 
 bot.dialog('/askUSR3Questions', [
     function (session) {
+        session.privateConversationData.usr3dialogPresented = true;
         session.beginDialog('/askCanton');
     },
     function (session) {
@@ -350,6 +352,40 @@ bot.dialog('/askUSR3NIDQuestions', [
     }
 ]);
 
+bot.dialog('/promptContactForm', [
+    function (session) {
+        builder.Prompts.choice(session, "Darf einer unserer Steuerfachpersonen Sie diesbezüglich kontaktieren?", 
+            ['Ja', 'Nein'],
+            {retryPrompt: "I verstehe nicht. Bitte antworten 'ja' oder 'nein'."});
+    }, 
+    function (session, results) {
+        if (results.response) {
+            if (results.response.entity == 'Ja') {
+                session.replaceDialog('/contactForm');
+            } else if (results.response.entity == 'Nein') {
+                session.send("Kann ich Ihnen bei einer weiteren Frage betreffend USTR III behilflich sein?");
+            }
+        }
+    }
+]);
+
+bot.dialog('/promptUSR3Effects', [
+    function (session) {
+        builder.Prompts.choice(session, "Möchten Sie wissen welche auswirkungen die USR III kann haben auf Ihre Unternehmen?", 
+            ['Ja', 'Nein'],
+            {retryPrompt: "I verstehe nicht. Bitte antworten 'ja' oder 'nein'."});
+    }, 
+    function (session, results) {
+        if (results.response) {
+            if (results.response.entity == 'Ja') {
+                session.replaceDialog('/askUSR3Questions');
+            } else if (results.response.entity == 'Nein') {
+                session.send("Kann ich Ihnen bei einer weiteren Frage betreffend USTR III behilflich sein?");
+            }
+        }
+    }
+]);
+
 intents.matches(/^version/i, function (session) {
     session.send('Bot version 0.1');
 });
@@ -399,22 +435,30 @@ intents.matches(/^qna/i, function (session) {
     session.send('Hier ist meine Inhaltverzeichnis: %s', Object.keys(qnadict));
 });
 
-intents.onDefault([(session) => {
-        session.send("Dies kann ich Ihnen leider nicht beantworten. Bitte beachten Sie, dass dieser ChatBot auf Fragen zur Unternehmenssteuerreform III (USR III) limitiert ist.");
-        builder.Prompts.choice(session, "Darf einer unserer Steuerfachpersonen Sie diesbezüglich kontaktieren?", 
-            ['Ja', 'Nein'],
-            {retryPrompt: "I verstehe nicht. Bitte antworten 'ja' oder 'nein'."});
-    }, 
-    function (session, results) {
-        if (results.response) {
-            if (results.response.entity == 'Ja') {
-                session.replaceDialog('/contactForm');
-            } else if (results.response.entity == 'Nein') {
-                session.send("Kann ich Ihnen bei einer weiteren Frage betreffend USTR III behilflich sein?");
-            }
-        }
+intents.onDefault([(session) => {         
+    session.send("Dies kann ich Ihnen leider nicht beantworten. Bitte beachten Sie, dass dieser ChatBot auf Fragen zur Unternehmenssteuerreform III (USR III) limitiert ist.");        
+    if (session.privateConversationData.usr3dialogPresented) {
+        session.beginDialog('/promptContactForm');
+    } else {
+        session.beginDialog('/promptUSR3Effects');
     }
-]);
+}]);
+// intents.onDefault([(session) => {
+//         session.send("Dies kann ich Ihnen leider nicht beantworten. Bitte beachten Sie, dass dieser ChatBot auf Fragen zur Unternehmenssteuerreform III (USR III) limitiert ist.");        
+//         builder.Prompts.choice(session, "Darf einer unserer Steuerfachpersonen Sie diesbezüglich kontaktieren?", 
+//             ['Ja', 'Nein'],
+//             {retryPrompt: "I verstehe nicht. Bitte antworten 'ja' oder 'nein'."});
+//     }, 
+//     function (session, results) {
+//         if (results.response) {
+//             if (results.response.entity == 'Ja') {
+//                 session.replaceDialog('/contactForm');
+//             } else if (results.response.entity == 'Nein') {
+//                 session.send("Kann ich Ihnen bei einer weiteren Frage betreffend USTR III behilflich sein?");
+//             }
+//         }
+//     }
+// ]);
 
 bot.dialog('/', intents);    
 
