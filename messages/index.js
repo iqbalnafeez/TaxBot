@@ -1,9 +1,10 @@
-/*-----------------------------------------------------------------------------
-This template demonstrates how to use an IntentDialog with a LuisRecognizer to add 
-natural language support to a bot. 
-For a complete walkthrough of creating this type of bot see the article at
-http://docs.botframework.com/builder/node/guides/understanding-natural-language/
------------------------------------------------------------------------------*/
+//////////////////////////////////////////////////////////////////////
+/// KPMG Tax Bot                                                   /// 
+/// Authors: rikard.sandstrom@gmail.com, igor.zhilin@gmail.com     ///  
+/// The bot is designed to answer questions about the Swiss        ///
+/// corporate tax reform using KPMG's deep knowledge of the topic. ///
+//////////////////////////////////////////////////////////////////////
+
 "use strict";
 
 // This loads the environment variables from the .env file
