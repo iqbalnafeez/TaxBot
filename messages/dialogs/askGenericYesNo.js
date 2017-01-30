@@ -8,9 +8,7 @@ module.exports = {
             if (session.privateConversationData.usr3questions[session.privateConversationData.currentQuestionKey] !== '') {
                 session.endDialog();
             } else {
-                builder.Prompts.choice(session, args.prompt,
-                    ['Ja', 'Nein'],
-                    {retryPrompt: "I verstehe nicht. Bitte antworten 'ja' oder 'nein'."});
+                builder.Prompts.choice(session, args.prompt, "Ja|Nein", {listStyle: 3, retryPrompt: "I verstehe nicht. Bitte antworten 'ja' oder 'nein'."});
             }
         },  
         function (session, results) {

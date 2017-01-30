@@ -354,9 +354,7 @@ bot.dialog('/askUSR3NIDQuestions', [
 
 bot.dialog('/promptContactForm', [
     function (session) {
-        builder.Prompts.choice(session, "Darf einer unserer Steuerfachpersonen Sie diesbezüglich kontaktieren?", 
-            ['Ja', 'Nein'],
-            {retryPrompt: "I verstehe nicht. Bitte antworten 'ja' oder 'nein'."});
+        builder.Prompts.choice(session, "Darf einer unserer Steuerfachpersonen Sie diesbezüglich kontaktieren?", "Ja|Nein", {listStyle: 3, retryPrompt: "I verstehe nicht. Bitte antworten 'ja' oder 'nein'."});
     }, 
     function (session, results) {
         if (results.response) {
@@ -371,9 +369,7 @@ bot.dialog('/promptContactForm', [
 
 bot.dialog('/promptUSR3Effects', [
     function (session) {
-        builder.Prompts.choice(session, "Möchten Sie wissen welche auswirkungen die USR III kann haben auf Ihre Unternehmen?", 
-            ['Ja', 'Nein'],
-            {retryPrompt: "I verstehe nicht. Bitte antworten 'ja' oder 'nein'."});
+        builder.Prompts.choice(session, "Möchten Sie wissen welche auswirkungen die USR III kann haben auf Ihre Unternehmen?", "Ja|Nein", {listStyle: 3, retryPrompt: "I verstehe nicht. Bitte antworten 'ja' oder 'nein'."});
     }, 
     function (session, results) {
         if (results.response) {
