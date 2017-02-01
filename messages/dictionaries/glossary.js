@@ -30,7 +30,7 @@ module.exports = {
         "cards": [
             "Altrechtlich D.jpg",
             "Altrechtlich B.jpg",
-            "Altrechtlich B1.jpg"
+            "Altrechtlich B 1.jpg"
         ]
     },
     "Neurechtlicher Step up": {
@@ -200,7 +200,7 @@ module.exports = {
         ],
         "longText": "Mit der USR III soll die ermässigte Besteuerung von Holding-, Domizil- und gemischten Gesellschaften abgeschafft werden. Diese steht nicht mehr im Einklang mit internationalen Standards. Um einen Wettbewerbsverlust der Schweiz zu verhindern, sollen international akzeptierte steuerliche Entlastungsmassnahmen eingeführt werden. Im Vordergrund steht dabei die Förderung von Innovationen. Auch wird der Bund die von den Kantonen beabsichtigten Gewinnsteuersenkungen mittragen.",
         "cards": [
-            "USR III HL,jpg",
+            "USR III HL.jpg",
             "Zweck USR III HL.jpg"
         ]
     },
@@ -443,7 +443,7 @@ module.exports = {
         "cards": [
             "Auswirkungen USR III HL.jpg",
             "Auswirkungen USR III D.jpg",
-            "Auswirkungen USR D 2.jpg"
+            "Auswirkungen USR III D 2.jpg"
         ]
     },
     "Verlierer und Gewinner": {
