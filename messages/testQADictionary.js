@@ -3,7 +3,7 @@
 */
 
 // Dictionaries
-var qnaDict = require('./dictionaries/qnadict');
+var qnaDict = require('./dictionaries/glossary');
 
 // to read and write JSON file 
 var fs = require('fs');
@@ -136,4 +136,19 @@ var JSONtoObject = function(JSONfilePath) {
     });
 }
 
-var glossaryObject = JSONtoObject("./dictionaries/glossary_v2_ES.txt");
+// check if card file names are specified correctly in the glossary
+var imageFolder = './images/'
+for(singleEntryKey in qnaDict) {
+    
+    if(qnaDict[singleEntryKey].cards.length > 0) {
+        for(card in qnaDict[singleEntryKey].cards) {
+            var imagePath = imageFolder + qnaDict[singleEntryKey].cards[card];
+            if (!fs.existsSync(imagePath)) {
+                console.log(qnaDict[singleEntryKey].cards[card]) ;
+            }
+
+            
+
+        }
+    }
+};
