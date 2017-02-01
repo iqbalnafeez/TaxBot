@@ -202,7 +202,7 @@ bot.dialog('/replyUSR3', [
         var key = 'ordSteuersaetze';
         if (session.privateConversationData.canton
             && !session.privateConversationData.usr3Answers[key].presented) {
-            session.send(usr3AnswersDB[key]);
+            session.send(usr3AnswersDB[key].longText);
             session.privateConversationData.usr3Answers[key].active = true;
             session.privateConversationData.usr3Answers[key].presented = true;
         };
@@ -210,7 +210,7 @@ bot.dialog('/replyUSR3', [
         if (session.privateConversationData.usr3Questions.rechnungslegungIFRS 
             && session.privateConversationData.usr3Questions.latenteSteuern
             && !session.privateConversationData.usr3Answers[key].presented) {
-            session.send(usr3AnswersDB[key]);
+            session.send(usr3AnswersDB[key].longText);
             session.privateConversationData.usr3Answers[key].active = true;
             session.privateConversationData.usr3Answers[key].presented = true;
         };
@@ -218,7 +218,7 @@ bot.dialog('/replyUSR3', [
         if (session.privateConversationData.usr3Questions.holding 
             && session.privateConversationData.usr3Questions.stilleReserven
             && !session.privateConversationData.usr3Answers[key].presented) {
-            session.send(usr3AnswersDB[key]);
+            session.send(usr3AnswersDB[key].longText);
             session.privateConversationData.usr3Answers[key].active = true;
             session.privateConversationData.usr3Answers[key].presented = true;
         };
@@ -227,7 +227,7 @@ bot.dialog('/replyUSR3', [
             && session.privateConversationData.usr3Questions.stilleReserven
             && !session.privateConversationData.usr3Questions.stilleReservenGewinn
             && !session.privateConversationData.usr3Answers[key].presented) {
-            session.send(usr3AnswersDB[key]);
+            session.send(usr3AnswersDB[key].longText);
             session.privateConversationData.usr3Answers[key].active = true;
             session.privateConversationData.usr3Answers[key].presented = true;
         };
@@ -235,14 +235,14 @@ bot.dialog('/replyUSR3', [
         if (session.privateConversationData.usr3Questions.patents 
             && (session.privateConversationData.usr3Questions.IP_CH || session.privateConversationData.usr3Questions.IP_Foreign3rdParty)
             && !session.privateConversationData.usr3Answers[key].presented) {
-            session.send(usr3AnswersDB[key]);
+            session.send(usr3AnswersDB[key].longText);
             session.privateConversationData.usr3Answers[key].active = true;
             session.privateConversationData.usr3Answers[key].presented = true;
         };
         var key = 'feMehrfachabzug';
         if (session.privateConversationData.usr3Questions.FE_CH 
             && !session.privateConversationData.usr3Answers[key].presented) {
-            session.send(usr3AnswersDB[key]);
+            session.send(usr3AnswersDB[key].longText);
             session.privateConversationData.usr3Answers[key].active = true;
             session.privateConversationData.usr3Answers[key].presented = true;
         };
@@ -251,7 +251,7 @@ bot.dialog('/replyUSR3', [
             && !session.privateConversationData.usr3Questions.vermoegen
             && session.privateConversationData.usr3Questions.aktivdarlehen
             && !session.privateConversationData.usr3Answers[key].presented) {
-            session.send(usr3AnswersDB[key]);
+            session.send(usr3AnswersDB[key].longText);
             session.privateConversationData.usr3Answers[key].active = true;
             session.privateConversationData.usr3Answers[key].presented = true;
         };
@@ -260,7 +260,7 @@ bot.dialog('/replyUSR3', [
             && !session.privateConversationData.usr3Questions.vermoegen
             && !session.privateConversationData.usr3Questions.aktivdarlehen
             && !session.privateConversationData.usr3Answers[key].presented) {
-            session.send(usr3AnswersDB[key]);
+            session.send(usr3AnswersDB[key].longText);
             session.privateConversationData.usr3Answers[key].active = true;
             session.privateConversationData.usr3Answers[key].presented = true;
         };
@@ -268,7 +268,7 @@ bot.dialog('/replyUSR3', [
         if ( session.privateConversationData.usr3Questions.patents
             || (session.privateConversationData.usr3Questions.eigenfinanzierung && session.privateConversationData.usr3Questions.vermoegen)
             && !session.privateConversationData.usr3Answers[key].presented) {
-            session.send(usr3AnswersDB[key]);
+            session.send(usr3AnswersDB[key].longText);
             session.privateConversationData.usr3Answers[key].active = true;
             session.privateConversationData.usr3Answers[key].presented = true;
         };
