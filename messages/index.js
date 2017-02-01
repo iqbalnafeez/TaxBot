@@ -128,7 +128,7 @@ intents.onBegin(function (session) {
         });
         session.beginDialog('/askName');
     } else {
-        session.send("Was mehr möcten Sie im Zusammenhang mit der USR III wissen?");
+        session.send("Was mehr möchten Sie im Zusammenhang mit der USR III wissen?");
     }
 });
 
@@ -417,6 +417,13 @@ intents.matches('QnA', [
        
         var foundGlossaryArticle = glossaryLookup(topic.entity, qnadict);
 
+        // if article not found, just end the dialog 
+        if(!foundGlossaryArticle) {
+            session.send('Leider weiss ich nicht, was %s meint. Bitte fragen Sie mich etwas über Unternehmenssteuerreform.', topic.entity);
+            session.endDialog();
+            return;
+        }
+
 		// here we will store a list of HeroCards, one entry is a full HeroCard object with picture etc..
 		var HeroCardArray = [];
 
@@ -441,9 +448,7 @@ intents.matches('QnA', [
         session.send('Sie möchten wissen was %s meint? Moment bitte, ich suche ein Antwort für Sie.', foundGlossaryArticle.key);
         session.send(foundGlossaryArticle.object.longText);
         if(msg) {
-            // tryin out both ways and whats the difference bw them
             session.send(msg);
-            //builder.Prompts.text(session, msg);
         };
     }
 ]);
