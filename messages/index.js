@@ -16,9 +16,16 @@ var azure = require('azure-storage');
 var didYouMean = require("didyoumean2");
 
 // Dictionaries
-var qnadict = require('./dictionaries/qnadict');
+var qnadict = require('./dictionaries/glossary');
+var glossaryLookup = require('./glossaryLookup');
 var usr3questions = require('./dictionaries/usr3questions');
 var usr3answers = require('./dictionaries/usr3answers');
+
+// helper to create herocards
+var makeherocard = require('./makeherocard');
+
+// Path to folder with images
+const pathToImages = 'http://kpmgvirtualtaxadvisor.azurewebsites.net/images/';
 
 // Connection to a remote NoSQL database
 // Azure Table Storage
@@ -90,6 +97,8 @@ bot.on('conversationUpdate',
                         .address(message.address)
                         .text(instructions);
                     bot.send(reply);
+                    // immediately jump into our main dialog, which will ask name and process LUIS intents
+                    bot.beginDialog(message.address, '*:/');
                 }
             });
         }
@@ -405,12 +414,39 @@ intents.matches('Greet', function (session, args) {
 intents.matches('QnA', [
     function (session, args) {
         var topic = builder.EntityRecognizer.findEntity(args.entities, 'Topic');
-        console.log(topic);
-        var keys = Object.keys(qnadict);
-        var bestMatch = didYouMean(topic.entity, keys);
-        console.log(bestMatch);
-        session.send('Sie möchten wissen was %s meint? Moment bitte, ich suche ein Antwort führ Sie.', bestMatch);
-        session.send(qnadict[bestMatch]);
+       
+        var foundGlossaryArticle = glossaryLookup(topic.entity, qnadict);
+
+		// here we will store a list of HeroCards, one entry is a full HeroCard object with picture etc..
+		var HeroCardArray = [];
+
+		// loop through all contained cards and populate the HeroCardArray
+		if(foundGlossaryArticle.object.cards) {
+			var cards = foundGlossaryArticle.object.cards;
+			cards.forEach(
+				function(card) {
+                    var args = {};
+                    args.thumbURL = pathToImages + card;
+                    args.linkURL = pathToImages + card;
+                    args.linkText = 'Bild vergrössern';
+					HeroCardArray.push(makeherocard(session,args))
+				});
+            // create message
+		    var msg = new builder.Message(session);                
+            msg.textFormat(builder.TextFormat.xml)
+			msg.attachmentLayout(builder.AttachmentLayout.carousel)
+			msg.attachments(HeroCardArray);
+		};
+
+        session.send('Sie möchten wissen was %s meint? Moment bitte, ich suche ein Antwort für Sie.', foundGlossaryArticle.key);
+        session.sendTyping();
+        session.send(foundGlossaryArticle.object.longText);
+        session.sendTyping();
+        if(msg) {
+            // tryin out both ways and whats the difference bw them
+            session.send(msg);
+            //builder.Prompts.text(session, msg);
+        };
     }
 ]);
 
