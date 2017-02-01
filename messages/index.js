@@ -420,8 +420,8 @@ intents.matches('QnA', [
 		// here we will store a list of HeroCards, one entry is a full HeroCard object with picture etc..
 		var HeroCardArray = [];
 
-		// loop through all contained cards and populate the HeroCardArray
-		if(foundGlossaryArticle.object.cards) {
+		// loop through all contained cards and populate the HeroCardArray - if there are any cards attached to glossary article
+		if(foundGlossaryArticle.object.cards && foundGlossaryArticle.object.cards.length > 0) {
 			var cards = foundGlossaryArticle.object.cards;
 			cards.forEach(
 				function(card) {
@@ -439,9 +439,7 @@ intents.matches('QnA', [
 		};
 
         session.send('Sie möchten wissen was %s meint? Moment bitte, ich suche ein Antwort für Sie.', foundGlossaryArticle.key);
-        session.sendTyping();
         session.send(foundGlossaryArticle.object.longText);
-        session.sendTyping();
         if(msg) {
             // tryin out both ways and whats the difference bw them
             session.send(msg);
