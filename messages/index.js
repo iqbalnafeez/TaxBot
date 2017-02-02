@@ -138,9 +138,7 @@ intents.onBegin(function (session) {
         Object.keys(usr3AnswersDB).forEach(function (key) {
             session.privateConversationData.usr3Answers[key] = {presented: false, active: false};
         });
-        if(!session.privateConversationData.username) {
-            session.beginDialog('/askName');
-        }
+        session.beginDialog('/askName');
         
     } else {
 
