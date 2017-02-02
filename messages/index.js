@@ -97,6 +97,8 @@ bot.on('conversationUpdate',
                         .address(message.address)
                         .text(instructions);
                     bot.send(reply);
+                    // kill current dialog
+                    bot.endDialog(message.address);
                     // immediately jump into our main dialog, which will ask name and process LUIS intents
                     bot.beginDialog(message.address, '*:/');
                 }
@@ -136,7 +138,10 @@ intents.onBegin(function (session) {
         Object.keys(usr3AnswersDB).forEach(function (key) {
             session.privateConversationData.usr3Answers[key] = {presented: false, active: false};
         });
-        session.beginDialog('/askName');
+        if(!session.privateConversationData.username) {
+            session.beginDialog('/askName');
+        }
+        
     } else {
 
         // !!!!!!!!!!!!!!!! here we need to start a general dialog (show me glossary or effects ????)
@@ -269,6 +274,7 @@ bot.dialog('/replyUSR3', [
             || (session.privateConversationData.usr3Questions.eigenfinanzierung && session.privateConversationData.usr3Questions.vermoegen)
             && !session.privateConversationData.usr3Answers[key].presented) {
             session.send(usr3AnswersDB[key].longText);
+            
             session.privateConversationData.usr3Answers[key].active = true;
             session.privateConversationData.usr3Answers[key].presented = true;
         };
