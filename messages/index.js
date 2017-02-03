@@ -96,8 +96,9 @@ bot.on('conversationUpdate',
         var reply = new builder.Message()
             .address(message.address);
 
-        reply.text(JSON.stringify(message));
-        bot.send(reply);
+        // what we get on conversationUpdate
+        // reply.text(JSON.stringify(message));
+        // bot.send(reply);
 
         if (message.membersAdded) {
             // membersAdded is the list of actors in the conversation (user and bot)
