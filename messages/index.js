@@ -93,34 +93,23 @@ var botAdded = false;
 bot.on('conversationUpdate', 
     function (message) {
         var reply = new builder.Message()
-            reply
-                .address(message.address)
-                .text("bot ID: "+ message.address.bot.id);
-            bot.send(reply);
+            .address(message.address);
         if (message.membersAdded) {
             // TWO values are pushed into membersAdded:
             // id: "default-user"
             // id: "default-bot"
             message.membersAdded.forEach((identity) => {
-            reply
-                .address(message.address)
-                .text("member added: "+ identity.id);
-            bot.send(reply);
-/*                
                 // azure adds the bot twice for some reason, 
-                if (identity.id === "default-bot") {
+                if (identity.id === message.address.bot.id && !botAdded) {
                     botAdded = true;
                     var instructions = 'Grüezi! Ich bin der KPMG Virtual Tax Advisor.\n\n\nGerne unterstütze ich Sie bei Unklarheiten im Zusammenhang mit der Unternehmenssteuerreform III (USR III). Sie können mir Fragen zu Elementen der USR III oder zu Begriffen im Zusammenhang mit der USR III stellen. Gerne können wir aber auch gemeinsam analysieren, inwiefern die USR III Auswirkungen auf Ihr Unternehmen haben wird. Geben Sie für letzteres einfach Auswirkungen ins Eingabefeld ein.\n\n\nIch freue mich auf das Gespräch mit Ihnen.';
-                    var reply = new builder.Message()
-                        .address(message.address)
+                    reply
                         .text(instructions);
                     bot.send(reply);
-                    reply.text("member added: "+ identity.id)
-                    bot.send(reply);
+                    
                     // immediately jump into our main dialog, which will ask name and process LUIS intents
                     bot.beginDialog(message.address, '*:/');
-                }
-*/                
+                }              
             });
         }
     }
