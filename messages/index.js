@@ -94,7 +94,12 @@ bot.on('conversationUpdate',
     function (message) {
         var reply = new builder.Message()
             .address(message.address);
+
+        reply.text("bot added: " + botAdded);
+             bot.send(reply);
+
         if (message.membersAdded) {
+
             // TWO values are pushed into membersAdded:
             // id: "default-user"
             // id: "default-bot"
@@ -103,8 +108,7 @@ bot.on('conversationUpdate',
                 if (identity.id === message.address.bot.id && !botAdded) {
                     botAdded = true;
                     var instructions = 'Grüezi! Ich bin der KPMG Virtual Tax Advisor.\n\n\nGerne unterstütze ich Sie bei Unklarheiten im Zusammenhang mit der Unternehmenssteuerreform III (USR III). Sie können mir Fragen zu Elementen der USR III oder zu Begriffen im Zusammenhang mit der USR III stellen. Gerne können wir aber auch gemeinsam analysieren, inwiefern die USR III Auswirkungen auf Ihr Unternehmen haben wird. Geben Sie für letzteres einfach Auswirkungen ins Eingabefeld ein.\n\n\nIch freue mich auf das Gespräch mit Ihnen.';
-                    reply
-                        .text(instructions);
+                    reply.text(instructions);
                     bot.send(reply);
                     
                     // immediately jump into our main dialog, which will ask name and process LUIS intents
