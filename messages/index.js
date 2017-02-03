@@ -111,6 +111,8 @@ bot.on('conversationUpdate',
                     reply.text(instructions);
                     bot.send(reply);
                     
+                    reply.text("bot added: " + botAdded);
+                    bot.send(reply);
                     // immediately jump into our main dialog, which will ask name and process LUIS intents
                     bot.beginDialog(message.address, '*:/');
                 }              
