@@ -87,7 +87,7 @@ bot.dialog('/closeContactForm', di_closeContactForm.Dialog);
 bot.dialog('/greetUser', di_greetUser.Dialog);
 
  // workaround for azure
-var userAdded = false;
+var botAdded = false;
 
 // Starting a new conversation will trigger this message
 bot.on('conversationUpdate', 
@@ -98,8 +98,8 @@ bot.on('conversationUpdate',
             // membersAdded is the list of actors in the conversation (user and bot)
             message.membersAdded.forEach((identity) => {
                 // azure adds the bot twice for some reason, 
-                if (identity.id === message.user.id && !userAdded) {
-                    userAdded = true;
+                if (identity.id === message.address.bot.id && !botAdded) {
+                    botAdded = true;
 
                     setTimeout(()=> {}, 500);
 
