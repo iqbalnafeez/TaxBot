@@ -89,19 +89,30 @@ bot.dialog('/greetUser', di_greetUser.Dialog);
 // Starting a new conversation will trigger this message
 bot.on('conversationUpdate', 
     function (message) {
+        
+        // check if conversationUpdate is caused by adding user, not bot
+        
+        var userAdded = false;
         if (message.membersAdded) {
+            // TWO values are pushed into membersAdded:
+            // id: "default-user"
+            // id: "default-bot"
             message.membersAdded.forEach((identity) => {
-                if (identity.id === message.address.bot.id) {
+                // if added member is the user, send the initial greeting
+                // note: for some reason, when on azure, if we put "default-bot" as identity.id, it is called TWICE
+                // so now trying with default user instead
+                if (identity.id === "default-user") {
                     var instructions = 'Grüezi! Ich bin der KPMG Virtual Tax Advisor.\n\n\nGerne unterstütze ich Sie bei Unklarheiten im Zusammenhang mit der Unternehmenssteuerreform III (USR III). Sie können mir Fragen zu Elementen der USR III oder zu Begriffen im Zusammenhang mit der USR III stellen. Gerne können wir aber auch gemeinsam analysieren, inwiefern die USR III Auswirkungen auf Ihr Unternehmen haben wird. Geben Sie für letzteres einfach Auswirkungen ins Eingabefeld ein.\n\n\nIch freue mich auf das Gespräch mit Ihnen.';
                     var reply = new builder.Message()
                         .address(message.address)
                         .text(instructions);
                     bot.send(reply);
-
                     // immediately jump into our main dialog, which will ask name and process LUIS intents
                     bot.beginDialog(message.address, '*:/');
                 }
             });
+            
+
         }
     }
 );
@@ -142,7 +153,7 @@ intents.onBegin(function (session) {
     } else {
 
         // !!!!!!!!!!!!!!!! here we need to start a general dialog (show me glossary or effects ????)
-        session.send("Was mehr möchten Sie im Zusammenhang mit der USR III wissen?");
+        session.send("Was mehr möchten Sie wissen im Zusammenhang mit der USR III?");
     }
 });
 
@@ -447,6 +458,7 @@ intents.matches('QnA', [
 
         // if article not found, just end the dialog and return to parent
         if(!foundGlossaryArticle) {
+            // !!!!! PROBLEM: this causes the conversation to jump to intents.onBegin !!!!!!
             session.endDialog('Leider weiss ich nicht, was es meint. Bitte fragen Sie mir etwas über die Reform.');
             // force to return, because even tho i call endDialog() above, function execution continues down below, which is not desired
             return;
@@ -480,7 +492,7 @@ intents.matches('QnA', [
         };
     }, // first QnA question ends
     function (session, results) {
-        session.endDialog("QnA end questions")
+        session.endDialog("Danke für Ihre Fragen.")
     }
 ]);
 
