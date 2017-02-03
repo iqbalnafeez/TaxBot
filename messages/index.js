@@ -86,27 +86,22 @@ bot.dialog('/askCanton', di_askCanton.Dialog);
 bot.dialog('/closeContactForm', di_closeContactForm.Dialog);
 bot.dialog('/greetUser', di_greetUser.Dialog);
 
- // workaround for azure: for some reason, it adds the "default-bot" twice
-var botAdded = false;
+ // workaround for azure
+var userAdded = false;
 
 // Starting a new conversation will trigger this message
 bot.on('conversationUpdate', 
-    // message is 
     function (message) {
         var reply = new builder.Message()
             .address(message.address);
-
         if (message.membersAdded) {
-
-            // TWO values are pushed into membersAdded:
-            // id: "default-user"
-            // id: "default-bot"
+            // membersAdded is the list of actors in the conversation (user and bot)
             message.membersAdded.forEach((identity) => {
                 // azure adds the bot twice for some reason, 
-                if (identity.id === message.address.bot.id && !botAdded) {
-                    botAdded = true;
+                if (identity.id === message.user.id && !userAdded) {
+                    userAdded = true;
 
-                    setTimeout(()=> {}, 250);
+                    setTimeout(()=> {}, 500);
 
                     var instructions = 'Grüezi! Ich bin der KPMG Virtual Tax Advisor.\n\n\nGerne unterstütze ich Sie bei Unklarheiten im Zusammenhang mit der Unternehmenssteuerreform III (USR III). Sie können mir Fragen zu Elementen der USR III oder zu Begriffen im Zusammenhang mit der USR III stellen. Gerne können wir aber auch gemeinsam analysieren, inwiefern die USR III Auswirkungen auf Ihr Unternehmen haben wird. Geben Sie für letzteres einfach Auswirkungen ins Eingabefeld ein.\n\n\nIch freue mich auf das Gespräch mit Ihnen.';
                     reply.text(instructions);
