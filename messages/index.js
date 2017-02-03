@@ -92,15 +92,20 @@ var botAdded = false;
 // Starting a new conversation will trigger this message
 bot.on('conversationUpdate', 
     function (message) {
+        var reply = new builder.Message()
+            reply
+                .address(message.address)
+                .text("bot ID: "+ message.address.bot.id);
+            bot.send(reply);
         if (message.membersAdded) {
             // TWO values are pushed into membersAdded:
             // id: "default-user"
             // id: "default-bot"
             message.membersAdded.forEach((identity) => {
-                    var reply = new builder.Message()
-                        .address(message.address)
-                        .text("member added: "+ identity.id);
-                    bot.send(reply);
+            reply
+                .address(message.address)
+                .text("member added: "+ identity.id);
+            bot.send(reply);
 /*                
                 // azure adds the bot twice for some reason, 
                 if (identity.id === "default-bot") {
