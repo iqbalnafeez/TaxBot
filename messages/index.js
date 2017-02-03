@@ -92,9 +92,13 @@ var botAdded = false;
 // Starting a new conversation will trigger this message
 bot.on('conversationUpdate', 
     function (message) {
-        console.log(JSON.stringify(message));
+
         var reply = new builder.Message()
             .address(message.address);
+
+        reply.text(instructions);
+        bot.send(JSON.stringify(message));
+
         if (message.membersAdded) {
             // membersAdded is the list of actors in the conversation (user and bot)
             message.membersAdded.forEach((identity) => {
