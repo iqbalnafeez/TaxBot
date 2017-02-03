@@ -97,8 +97,7 @@ bot.on('conversationUpdate',
                         .address(message.address)
                         .text(instructions);
                     bot.send(reply);
-                    // kill current dialog
-                    bot.endDialog(message.address);
+
                     // immediately jump into our main dialog, which will ask name and process LUIS intents
                     bot.beginDialog(message.address, '*:/');
                 }
@@ -431,18 +430,26 @@ intents.matches('QnA', [
     function (session, args, next) {
         // LUIS recognizes wording like 'was ist ****' and brings it back under the name of Topic
         // we can manage the topic recognizing logic on LUIS portal
-        var topic = builder.EntityRecognizer.findEntity(args.entities, 'Topic');
         
+        // Problem with LUIS: it recognizes EACH WORD AS SEPARATE TOPIC: if you type "neue steuerreform", it will find "neue" und "steuer"
+        // so we need to merge all topics into one string 
+        var topic = ""
+
+        for(var topicKey in args.entities) {
+            if(args.entities[topicKey].type = 'Topic') {
+                topic += " " + args.entities[topicKey].entity;
+            }
+        }
+        topic = topic.trim();
+
         // look up the word returned by LUIS in the glossary using our fuzzy lookup function
-        var foundGlossaryArticle = glossaryLookup(topic.entity, qnaDB);
+        var foundGlossaryArticle = glossaryLookup(topic, qnaDB);
 
         // if article not found, just end the dialog and return to parent
         if(!foundGlossaryArticle) {
-            session.endDialog("QnA end questions but from not found glossary");
-            // ????????????????? WHICH DIALOG ENDS HERE ???????????????
-            //session.endDialog('Leider weiss ich nicht, was %s meint. Bitte fragen Sie mich etwas über Unternehmenssteuerreform.', topic.entity);
-            // this just breaks execution of QnA 
-            //return;
+            session.endDialog('Leider weiss ich nicht, was es meint. Bitte fragen Sie mir etwas über die Reform.');
+            // force to return, because even tho i call endDialog() above, function execution continues down below, which is not desired
+            return;
         }
 
 		// here we will store a list of HeroCards, one entry is a full HeroCard object with picture etc..
