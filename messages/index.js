@@ -95,9 +95,6 @@ bot.on('conversationUpdate',
         var reply = new builder.Message()
             .address(message.address);
 
-        reply.text("bot added: " + botAdded);
-             bot.send(reply);
-
         if (message.membersAdded) {
 
             // TWO values are pushed into membersAdded:
@@ -111,8 +108,7 @@ bot.on('conversationUpdate',
                     reply.text(instructions);
                     bot.send(reply);
                     
-                    reply.text("bot added: " + botAdded);
-                    bot.send(reply);
+
                     // immediately jump into our main dialog, which will ask name and process LUIS intents
                     bot.beginDialog(message.address, '*:/');
                 }              
