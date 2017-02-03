@@ -10,7 +10,7 @@ module.exports = {
         function (session, results) {
             if (results.response) {
                 session.privateConversationData.username = results.response;
-                session.endDialog("Hallo %s, es freut mich dass Sie den USR III Chatbot nutzen.", session.privateConversationData.username);
+                session.endDialog("Hallo %s, es freut mich dass Sie den USR III Chatbot nutzen. Bitte fragen sie mich 'was ist neue steuerreform' oder typpen 'auswirkungen' ein, um zu sehen, was für Auswirkungen die Reform auf Ihre Unternehmen haben kann.", session.privateConversationData.username);
             }
         }
     ]
