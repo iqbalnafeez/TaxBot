@@ -93,6 +93,9 @@ var botAdded = false;
 bot.on('conversationUpdate', 
     function (message) {
 
+        console.log("conversationUpdate >>>>");
+        console.log(JSON.stringify(message));
+
         var reply = new builder.Message()
             .address(message.address);
 
@@ -216,6 +219,9 @@ bot.dialog('/contactForm', [
 bot.dialog('/replyUSR3', [
     function (session) {
         var key = 'ordSteuersaetze';
+        /*
+            this question applies at all times
+        */        
         if (session.privateConversationData.canton
             && !session.privateConversationData.usr3Answers[key].presented) {
             session.send(usr3AnswersDB[key].longText);
@@ -223,6 +229,10 @@ bot.dialog('/replyUSR3', [
             session.privateConversationData.usr3Answers[key].presented = true;
         };
         var key = 'auswirkungLatenteSteuern';
+        /*
+            holding =                   yes
+            latente steuern =           yes
+        */
         if (session.privateConversationData.usr3Questions.rechnungslegungIFRS 
             && session.privateConversationData.usr3Questions.latenteSteuern
             && !session.privateConversationData.usr3Answers[key].presented) {
@@ -231,14 +241,11 @@ bot.dialog('/replyUSR3', [
             session.privateConversationData.usr3Answers[key].presented = true;
         };
         var key = 'altrechtlicherStepup';
-        if (session.privateConversationData.usr3Questions.holding 
-            && session.privateConversationData.usr3Questions.stilleReserven
-            && !session.privateConversationData.usr3Answers[key].presented) {
-            session.send(usr3AnswersDB[key].longText);
-            session.privateConversationData.usr3Answers[key].active = true;
-            session.privateConversationData.usr3Answers[key].presented = true;
-        };
-        var key = 'neurechtlicherStepup';
+        /*
+            holding =                   yes
+            stille reserven =           yes
+            stille reserven gewinn =    no
+        */
         if (session.privateConversationData.usr3Questions.holding 
             && session.privateConversationData.usr3Questions.stilleReserven
             && !session.privateConversationData.usr3Questions.stilleReservenGewinn
@@ -247,7 +254,27 @@ bot.dialog('/replyUSR3', [
             session.privateConversationData.usr3Answers[key].active = true;
             session.privateConversationData.usr3Answers[key].presented = true;
         };
+        var key = 'neurechtlicherStepup';
+        /*
+            holding =                   yes
+            stille reserven =           yes
+            stille reserven gewinn =    yes
+        */
+        if (session.privateConversationData.usr3Questions.holding 
+            && session.privateConversationData.usr3Questions.stilleReserven
+            && session.privateConversationData.usr3Questions.stilleReservenGewinn
+            && !session.privateConversationData.usr3Answers[key].presented) {
+            session.send(usr3AnswersDB[key].longText);
+            session.privateConversationData.usr3Answers[key].active = true;
+            session.privateConversationData.usr3Answers[key].presented = true;
+        };
         var key = 'patentbox';
+        /*
+            patente =                   yes
+            IP CH =                     yes 
+                OR 
+            IP Foreign =                yes
+        */        
         if (session.privateConversationData.usr3Questions.patents 
             && (session.privateConversationData.usr3Questions.IP_CH || session.privateConversationData.usr3Questions.IP_Foreign3rdParty)
             && !session.privateConversationData.usr3Answers[key].presented) {
@@ -256,6 +283,9 @@ bot.dialog('/replyUSR3', [
             session.privateConversationData.usr3Answers[key].presented = true;
         };
         var key = 'feMehrfachabzug';
+        /*
+            F&E in CH =                 yes
+        */          
         if (session.privateConversationData.usr3Questions.FE_CH 
             && !session.privateConversationData.usr3Answers[key].presented) {
             session.send(usr3AnswersDB[key].longText);
@@ -263,15 +293,20 @@ bot.dialog('/replyUSR3', [
             session.privateConversationData.usr3Answers[key].presented = true;
         };
         var key = 'nidSpecial';
+        /*
+            eigenkapital =              yes
+            vermoegen nicht betrieb =   no
+        */          
         if (session.privateConversationData.usr3Questions.eigenfinanzierung 
             && !session.privateConversationData.usr3Questions.vermoegen
-            && session.privateConversationData.usr3Questions.aktivdarlehen
+//            && session.privateConversationData.usr3Questions.aktivdarlehen
             && !session.privateConversationData.usr3Answers[key].presented) {
             session.send(usr3AnswersDB[key].longText);
             session.privateConversationData.usr3Answers[key].active = true;
             session.privateConversationData.usr3Answers[key].presented = true;
         };
         var key = 'nidCommon';
+       
         if (session.privateConversationData.usr3Questions.eigenfinanzierung 
             && !session.privateConversationData.usr3Questions.vermoegen
             && !session.privateConversationData.usr3Questions.aktivdarlehen
@@ -281,8 +316,13 @@ bot.dialog('/replyUSR3', [
             session.privateConversationData.usr3Answers[key].presented = true;
         };
         var key = 'erleichtungKapitalsteuer';
-        if ( session.privateConversationData.usr3Questions.patents
-            || (session.privateConversationData.usr3Questions.eigenfinanzierung && session.privateConversationData.usr3Questions.vermoegen)
+        /*
+            patente =                   yes
+                OR
+            vermoegen nicht betrieb =   yes
+        */            
+        if ( (session.privateConversationData.usr3Questions.patents
+            || session.privateConversationData.usr3Questions.vermoegen)
             && !session.privateConversationData.usr3Answers[key].presented) {
             session.send(usr3AnswersDB[key].longText);
             
@@ -308,9 +348,31 @@ bot.dialog('/askUSR3Questions', [
         session.beginDialog('/askGenericYesNo', {key: session.privateConversationData.currentQuestionKey, 
             prompt: usr3QuestionsDB[session.privateConversationData.currentQuestionKey]});
     },
+
+////      //////// ////      //////// ////      //////// ////      //////// 
+// testing the prompts.choice as an alternative for generic yes no dialog 
+    // ask the yes/no question
     function (session) {
-        session.beginDialog('/replyUSR3');
+        var prompt = session.privateConversationData.currentQuestionKey + ">> Möchten Sie mehr wissen?" 
+        builder.Prompts.choice(session, prompt, "Ja|Nein", {listStyle: 3, retryPrompt: "I verstehe nicht. Bitte antworten 'ja' oder 'nein'."});
+    },  
+    // get the yes/no, and depending on the 
+    function (session, response, next) {
+        if(response.response.entity == 'Ja') {
+            session.beginDialog('/replyUSR3');
+            next();
+        }
+        else
+        {
+            session.send("Ignored.");
+            next();
+        }
     }, 
+
+////      //////// ////      //////// ////      //////// ////      //////// 
+//    function (session) {
+//       session.beginDialog('/replyUSR3');
+//    }, 
     function (session) {
         session.beginDialog('/askUSR3StepUpQuestions');
     },
