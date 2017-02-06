@@ -14,6 +14,7 @@ module.exports = {
         },  
         function (session, results) {
             if (results.response) {
+                // session.privateConversationData.usr3Questions will have true or false
                 session.privateConversationData.usr3Questions[session.privateConversationData.currentQuestionKey] = results.response.entity == "Ja";
                 session.endDialog();
             }
