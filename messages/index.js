@@ -107,7 +107,7 @@ bot.on('conversationUpdate',
             // membersAdded is the list of actors in the conversation (user and bot)
             message.membersAdded.forEach((identity) => {
                 // azure adds the bot twice for some reason, 
-                if (identity.id === message.address.bot.id && !botAdded) {
+                if (identity.id === message.address.bot.id ) {
                     botAdded = true;
 
                     setTimeout(()=> {}, 500);
