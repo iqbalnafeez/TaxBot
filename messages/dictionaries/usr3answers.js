@@ -1,7 +1,7 @@
 ﻿module.exports = {
 	ordSteuersaetze: {
-		longText: "Möchten Sie wissen, wie sich die aktuellen ordentlichen Steuersätze in den Kantonen voraussichtlich ändern?",
-		glossary: ["Steuersatzsenkung HL"]
+		longText: "Aktuelle ordentliche Steuersätze können für Sie interessant sein! \n\n\n\n\n Möchten Sie wissen, wie sich die aktuellen ordentlichen Steuersätze in den Kantonen voraussichtlich ändern?",
+		glossary: ["neue Steuersätze"]
 	},
 	auswirkungLatenteSteuern: {
 		longText: "Die USR III könnte Auswirkungen auf die Beurteilung der latenten Steuern Ihres Unternehmens haben. Diese Auswirkungen stehen in engem Zusammenhang zum Enactment (finaler Beschluss) der USR III. Möchten Sie weitere Informationen zum Thema Enactment erhalten?",

@@ -7,7 +7,7 @@ module.exports = {
             "Aufdeckung stiller Reserven",
             "Regelung zur Aufdeckung stiller Reserven"
         ],
-        "longText": "Der «Step Up» soll grundsätzlich sicherstellen, dass stille Reserven unter demjenigen Steuerregime besteuert werden, unter dem sie entstanden sind. Für Gesellschaften, die von einem privilegierten Status zur ordentlichen Besteuerung wechseln heisst dies, dass beim Statuswechsel vorhandene stille Reserven entsprechend tiefer besteuert werden sollen. Dies ist bei den Kantons- bzw. Gemeindesteuern relevant. Beim Step Up muss zwischen dem Step Up anlässlich eines vorzeitigen Statuswechsels (auch als altrechtlicher Step Up bezeichnet) und dem Step Up als Übergangsmassnahme (auch neurechtlicher Step Up genannt) unterschieden werden.",
+        "longText": "Der «Step Up» soll grundsätzlich sicherstellen, dass stille Reserven unter demjenigen Steuerregime besteuert werden, unter dem sie entstanden sind. \r\n\n Für Gesellschaften, die von einem privilegierten Status zur ordentlichen Besteuerung wechseln heisst dies, dass beim Statuswechsel vorhandene stille Reserven entsprechend tiefer besteuert werden sollen. Dies ist bei den Kantons- bzw. Gemeindesteuern relevant. Beim Step Up muss zwischen dem Step Up anlässlich eines vorzeitigen Statuswechsels (auch als altrechtlicher Step Up bezeichnet) und dem Step Up als Übergangsmassnahme (auch neurechtlicher Step Up genannt) unterschieden werden.",
         "cards": [
             "Step Up HL.jpg",
             "Step Up HL 2.jpg",
@@ -196,7 +196,8 @@ module.exports = {
             "Elemente der Unternehmenssteuerreform 3",
             "Massnahmen der Unternehmenssteuerreform 3",
             "Elemente",
-            "Massnahmen"
+            "Massnahmen",
+            "neue steuerreform"
         ],
         "longText": "Mit der USR III soll die ermässigte Besteuerung von Holding-, Domizil- und gemischten Gesellschaften abgeschafft werden. Diese steht nicht mehr im Einklang mit internationalen Standards. Um einen Wettbewerbsverlust der Schweiz zu verhindern, sollen international akzeptierte steuerliche Entlastungsmassnahmen eingeführt werden. Im Vordergrund steht dabei die Förderung von Innovationen. Auch wird der Bund die von den Kantonen beabsichtigten Gewinnsteuersenkungen mittragen.",
         "cards": [
