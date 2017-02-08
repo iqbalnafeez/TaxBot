@@ -658,7 +658,7 @@ intents.onDefault([(session) => {
     // Ignore LUIS and handle the message directly in the bot
 
     // if we type a, it will jump us into Auswirkungen dialog
-    var patternAuswirkungen = /.*a.*/i
+    var patternAuswirkungen = /.*auswirk.*/i
     if (patternAuswirkungen.test(session.message.text))    {
         session.replaceDialog('/askUSR3Questions');
     }
