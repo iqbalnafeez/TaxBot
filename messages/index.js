@@ -145,14 +145,6 @@ intents.onBegin(function (session) {
         session.privateConversationData.fullname = "";
         session.privateConversationData.fullcontact = "";
 
-        // this one is 
-        session.privateConversationData.firstname = "";
-        session.privateConversationData.company = "";
-        session.privateConversationData.position = "";
-        session.privateConversationData.email = "";
-        session.privateConversationData.telephone = "";
-        session.privateConversationData.callTimes = "";
-        session.privateConversationData.other = "";
         session.privateConversationData.canton = "";
 
         // usr3Questions are the USER'S ANSWERS (e.g. holding = true/false) to the questions in Auswirkungen dialog
@@ -188,14 +180,9 @@ bot.dialog('/contactForm', [
         var row = {
             PartitionKey: entGen.String(session.message.user.id),
             RowKey: entGen.String(session.message.address.conversation.id),
-            familyname: entGen.String(session.privateConversationData.familyname),
-            firstname: entGen.String(session.privateConversationData.firstname),
-            company: entGen.String(session.privateConversationData.company),
-            position: entGen.String(session.privateConversationData.position),
-            email: entGen.String(session.privateConversationData.email),
-            telephone: entGen.String(session.privateConversationData.telephone),
-            callTimes: entGen.String(session.privateConversationData.callTimes),
-            other: entGen.String(session.privateConversationData.other),
+            timestamp: entGen.DateTime(new Date()),
+            fullname: entGen.String(session.privateConversationData.fullname),
+            fullcontact: entGen.String(session.privateConversationData.fullcontact),
             canton: entGen.String(session.privateConversationData.canton),
             holding: entGen.String(session.privateConversationData.usr3Questions.holding),
             stilleReserven: entGen.String(session.privateConversationData.usr3Questions.stilleReserven),
@@ -556,7 +543,7 @@ bot.dialog('/promptUSR3Effects', [
             if (results.response.entity == 'Ja') {
                 session.replaceDialog('/askUSR3Questions');
             } else if (results.response.entity == 'Nein') {
-                session.send("Kann ich Ihnen bei einer weiteren Frage betreffend USTR III behilflich sein?");
+                session.beginDialog('/promptContactForm');
             }
         }
     }
@@ -602,6 +589,7 @@ intents.matches('QnA', [
         if(!foundGlossaryArticle) {
             session.endDialog('Leider weiss ich nicht, was es meint. Bitte fragen Sie mir etwas über die Reform.');
             // force to return, because even tho i call endDialog() above, function execution continues down below, which is not desired
+            session.replaceDialog('/');
             return;
         }
 
@@ -660,11 +648,13 @@ intents.onDefault([(session) => {
     // if we type a, it will jump us into Auswirkungen dialog
     var patternAuswirkungen = /.*auswirk.*/i
     if (patternAuswirkungen.test(session.message.text))    {
-        session.replaceDialog('/askUSR3Questions');
+        if(!session.privateConversationData.usr3dialogPresented) {
+            session.replaceDialog('/askUSR3Questions');
+        }
+        else {
+            session.beginDialog('/promptContactForm');
+        }
     }
-    else if (session.privateConversationData.usr3dialogPresented) {
-        session.beginDialog('/promptContactForm');
-    } 
     else {
         session.beginDialog('/promptUSR3Effects');
     }
