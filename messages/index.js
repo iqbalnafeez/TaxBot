@@ -86,7 +86,7 @@ var botAdded = false;
 // store reusable texts in a single place
 var dialogPrompts = {}
 dialogPrompts["/"] = {
-    entryPrompt:"Sie können mir Fragen zu Elementen der USR III oder zu Begriffen im Zusammenhang mit der USR III stellen. Gerne können wir aber auch gemeinsam analysieren, inwiefern die USR III Auswirkungen auf Ihr Unternehmen haben wird. Geben Sie für letzteres einfach Auswirkungen ins Eingabefeld ein.\n\n\nIch freue mich auf das Gespräch mit Ihnen.", exitPrompt: "Bye"
+    entryPrompt:"Sie können mir Fragen zu Elementen der USR III oder zu Begriffen im Zusammenhang mit der USR III stellen. Gerne können wir aber auch gemeinsam analysieren, inwiefern die USR III Auswirkungen auf Ihr Unternehmen haben wird. Geben Sie für letzteres einfach Auswirkungen ins Eingabefeld ein.\n\n\nIch freue mich auf das Gespräch mit Ihnen.", exitPrompt: "Bye"
 }
 
 // Starting a new conversation will trigger this message
@@ -396,7 +396,7 @@ bot.dialog('/askUSR3Questions', [
     // /// // // / / / ///// // / //// // /// // // / / / ///// // / //// // /// // // / / / ///// // / //// // /// // // / / / ///// // / //// 
     // HERE we should have another prompt: Continue - yes / no
     function (session) {
-        var prompt = "Möchten Sie weitere Fragen beantworten?"
+        var prompt = "Möchten Sie weiter analysieren und Fragen über stille Reserven beantworten?"
         builder.Prompts.choice(session, prompt, "Ja|Nein", {listStyle: 3, retryPrompt: "I verstehe nicht. Bitte antworten 'ja' oder 'nein'."});
     },
     function (session, results) {
@@ -414,7 +414,7 @@ bot.dialog('/askUSR3Questions', [
         session.beginDialog('/replyUSR3');
     }, 
         function (session) {
-        var prompt = "Möchten Sie weitere Fragen beantworten?"
+        var prompt = "Möchten Sie weiter analysieren und Fragen über Patente und IP beantworten?"
         builder.Prompts.choice(session, prompt, "Ja|Nein", {listStyle: 3, retryPrompt: "I verstehe nicht. Bitte antworten 'ja' oder 'nein'."});
     },
     function (session, results) {
@@ -434,7 +434,7 @@ bot.dialog('/askUSR3Questions', [
         session.beginDialog('/replyUSR3');
     }, 
         function (session) {
-        var prompt = "Möchten Sie weitere Fragen beantworten?"
+        var prompt = "Möchten Sie weiter analysieren und Fragen über kalkulatorischen Zinsabzug beantworten?"
         builder.Prompts.choice(session, prompt, "Ja|Nein", {listStyle: 3, retryPrompt: "I verstehe nicht. Bitte antworten 'ja' oder 'nein'."});
     },
     function (session, results) {
