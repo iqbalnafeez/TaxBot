@@ -5,24 +5,16 @@ module.exports = {
     Label: 'Contact form',
     Dialog: [
         function (session) {
-            builder.Prompts.text(session, 'Wie lautet Ihr Nachname?');
+            session.send("Ich möchte jetzt Ihre Kontaktdaten sammeln.");
+            builder.Prompts.text(session, 'Wie lautet Ihre Vollname?');
         },
         function (session, results) {
-            if (results.response) {
-                session.privateConversationData.familyname = results.response;
-            }
-            builder.Prompts.text(session, 'Wie lautet Ihr Vorhname?');
+            session.privateConversationData.fullname = results.response;
+            builder.Prompts.text(session, 'Wie und wann kann KPMG Sie kontaktieren? Sie können einfach schreiben "Dienstag Morgens, Natel 078 888 33 99" oder "Jederzeit mein.email@meine.firma" oder beide.');
         },
         function (session, results) {
-            if (results.response) {
-                session.privateConversationData.firstname = results.response;
-            }
-            builder.Prompts.choice(session, 'Vielen Dank. Wünschen Sie eine Kontaktaufnahme per Email oder Telefon?',
-                ['Email', 'Telefon'],
-                {retryPrompt: "I verstehe nicht. Bitte antworten 'Email' oder 'Telefon'."});
-        },
-        function (session, results) {
-            session.endDialogWithResult(results.response);
+            session.privateConversationData.fullcontact = results.response;
+            session.endDialog("Vielen Dank %s für die Nutzung des USR III Chatbot. In Kürze wird Sie einer Steuerfachpersonen kontaktieren. Ich wünsche Ihnen einen schönen Tag.", session.privateConversationData.username);
         }
     ]
 }
