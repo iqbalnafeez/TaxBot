@@ -90,41 +90,30 @@ dialogPrompts["/"] = {
 }
 
 // Starting a new conversation will trigger this message
+// updating following the guidance from MS
 bot.on('conversationUpdate', 
     function (message) {
 
-        console.log("conversationUpdate >>>>");
-        console.log(JSON.stringify(message));
+        // is this system message that the bot joined?
+        // then do not respond, because bot 
+        if (message.membersAdded[0].id == message.address.bot.id) {
+            return;
+        }
+
+        // replace the address in the system message with the address of the user 
+        // #TODO: find out how addresses work
+        message.address.user = message.membersAdded[0];
+
+        var greetingText = 'Grüezi! Ich bin der KPMG Virtual Tax Advisor.\n\n\nGerne unterstütze ich Sie bei Unklarheiten im Zusammenhang mit der Unternehmenssteuerreform III (USR III).' + dialogPrompts["/"].entryPrompt;
 
         var reply = new builder.Message()
-            .address(message.address);
+            .address(message.address)
+            .text(greetingText);
 
-        // what we get on conversationUpdate
-        // reply.text(JSON.stringify(message));
-        // bot.send(reply);
+        bot.send(reply);
 
-        if (message.membersAdded) {
-            // membersAdded is the list of actors in the conversation (user and bot)
-            message.membersAdded.forEach((identity) => {
-                // azure adds the bot twice for some reason, 
-                if (identity.id === message.address.bot.id ) {
-                    botAdded = true;    
-
-                    var instructions = 'Grüezi! Ich bin der KPMG Virtual Tax Advisor.\n\n\nGerne unterstütze ich Sie bei Unklarheiten im Zusammenhang mit der Unternehmenssteuerreform III (USR III).' + dialogPrompts["/"].entryPrompt;
-
-                    reply.text(instructions);
-                    bot.send(reply);
-
-                    // maybe a small delay will help avoid double triggering of on('conversationUpdate'
-                    setTimeout(()=> {}, 250);
-                    
-                    // immediately jump into our main dialog, which will ask name and process LUIS intents
-                    bot.beginDialog(message.address, '*:/');
-                }              
-            });
-        }
-    }
-);
+        bot.beginDialog(message.address, '*:/');
+});
 
 /*
 #### ##    ## #### ######## 
