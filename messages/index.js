@@ -123,7 +123,6 @@ bot.on('conversationUpdate',
             .text(greetingText);
 
         bot.send(reply);
-        setTimeout(() => {}, 200);
 
         bot.beginDialog(message.address, '*:/');
 
@@ -167,7 +166,8 @@ intents.onBegin(function (session) {
         });
 
         session.send('/');
-        session.send(JSON.stringify(session));
+        var sessionString = JSON.stringify(session);
+        session.send(sessionString);
 
         session.beginDialog('/askName');
         
