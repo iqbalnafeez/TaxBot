@@ -95,7 +95,10 @@ bot.on('conversationUpdate',
     function (message) {
 
         bot.send(new builder.Message().address(message.address).text(JSON.stringify(message)));
+        bot.send(new builder.Message().address(message.address).text('message.membersAdded[0].id = ' + message.membersAdded[0].id));
+        bot.send(new builder.Message().address(message.address).text('message.address.bot.id = ' + message.address.bot.id));
 
+        bot.send(new builder.Message().address(message.address).text(message.membersAdded[0].id == message.address.bot.id ? 'bot added, should start name dialog' : 'user added, should do nothing'));
 
         // is this system message that the bot joined?
         // we expect the bot to show up first, and this should trigger the message
@@ -107,7 +110,7 @@ bot.on('conversationUpdate',
             return;
         }
 
-        var greetingText = 'Grüezi! Ich bin der KPMG Virtual Tax Advisor.\n\n\nGerne unterstütze ich Sie bei Unklarheiten im Zusammenhang mit der Unternehmenssteuerreform III (USR III).' + dialogPrompts["/"].entryPrompt;
+        var greetingText = 'Grüezi! Ich bin der KPMG Virtual Tax Advisor.\n\n\nGerne unterstütze ich Sie bei Unklarheiten im Zusammenhang mit der Unternehmenssteuerreform III (USR III).\n\n' + dialogPrompts["/"].entryPrompt;
 
         var reply = new builder.Message()
             .address(message.address)
