@@ -86,7 +86,7 @@ var botAdded = false;
 // store reusable texts in a single place
 var dialogPrompts = {}
 dialogPrompts["/"] = {
-    entryPrompt:"Sie können mir Fragen zu Elementen der USR III oder zu Begriffen im Zusammenhang mit der USR III stellen. Gerne können wir aber auch gemeinsam analysieren, inwiefern die USR III Auswirkungen auf Ihr Unternehmen haben wird. Geben Sie für letzteres einfach Auswirkungen ins Eingabefeld ein.\n\n\nIch freue mich auf das Gespräch mit Ihnen.", exitPrompt: "Bye"
+    entryPrompt:"Sie können mir Fragen zu Elementen der USR III oder zu Begriffen im Zusammenhang mit der USR III stellen. Gerne können wir aber auch gemeinsam analysieren, inwiefern die USR III Auswirkungen auf Ihr Unternehmen haben wird. Geben Sie für letzteres einfach Auswirkungen ins Eingabefeld ein.<br>&nbsp;<br>Ich freue mich auf das Gespräch mit Ihnen.", exitPrompt: "Bye"
 }
 
 // Starting a new conversation will trigger this message
@@ -94,37 +94,23 @@ dialogPrompts["/"] = {
 bot.on('conversationUpdate', 
     function (message) {
 
-        //bot.send(new builder.Message().address(message.address).text(JSON.stringify(message)));
-        setTimeout(() => {return}, 200);
-
-        //bot.send(new builder.Message().address(message.address).text('message.membersAdded[0].id = ' + message.membersAdded[0].id));
-        //setTimeout(() => {return}, 200);
-
-        //bot.send(new builder.Message().address(message.address).text('message.address.bot.id = ' + message.address.bot.id));
-        //setTimeout(() => {return}, 200);
-
-        //bot.send(new builder.Message().address(message.address).text(message.membersAdded[0].id == message.address.bot.id ? 'bot added, should start name dialog' : 'user added, should do nothing'));
-        //setTimeout(() => {return}, 200);
-
         // is this system message that the bot joined?
         // we expect the bot to show up first, and this should trigger the message
         if (message.membersAdded[0].id != message.address.bot.id) {
-            // if it's not the bot, ignore the whole 'conversationUpdate'
-            
-            bot.send(new builder.Message().address(message.address).text('Jumping out of conversationUpdate'));
-            setTimeout(() => {return}, 200);
-            return;
-        }
+            // if it's not the bot, ignore the whole 'conversationUpdate'          
+            return; // !!! this still does not work on the higly async web chat, and the code after return is executed nonetheless !!!
+        };
 
-        var greetingText = 'Grüezi! Ich bin der KPMG Virtual Tax Advisor.\n\n\nGerne unterstütze ich Sie bei Unklarheiten im Zusammenhang mit der Unternehmenssteuerreform III (USR III).\n\n' + dialogPrompts["/"].entryPrompt;
+        var greetingText = 'Grüezi! Ich bin der KPMG Virtual Tax Advisor. Gerne unterstütze ich Sie bei Unklarheiten im Zusammenhang mit der Unternehmenssteuerreform III (USR III).<br>&nbsp;<br>' + dialogPrompts["/"].entryPrompt;
 
         var reply = new builder.Message()
+            .textFormat(builder.TextFormat.xml)
             .address(message.address)
             .text(greetingText);
 
         bot.send(reply);
 
-        bot.beginDialog(message.address, '*:/');
+        bot.beginDialog(message.address, '/');
 
 });
 
@@ -164,22 +150,6 @@ intents.onBegin(function (session) {
         Object.keys(usr3AnswersDB).forEach(function (key) {
             session.privateConversationData.usr3Answers[key] = {presented: false, active: false};
         });
-
-        session.send('/');
-        
-        var seen = [];
-        var sessionString = JSON.stringify(session.sessionState.callstack, function(key, val) {
-        if (val != null && typeof val == "object") {
-                if (seen.indexOf(val) >= 0) {
-                    return;
-                }
-                seen.push(val);
-            }
-            return val;
-        });
-
-
-        session.send(sessionString);
 
         session.beginDialog('/askName');
         
@@ -662,8 +632,7 @@ intents.matches(/^qna/i, function (session) {
 
 intents.onDefault([(session) => {         
     // Ignore LUIS and handle the message directly in the bot
-
-    // if we type a, it will jump us into Auswirkungen dialog
+    // if we type auswirk, it will jump us into Auswirkungen dialog
     var patternAuswirkungen = /.*auswirk.*/i
     if (patternAuswirkungen.test(session.message.text))    {
         if(!session.privateConversationData.usr3dialogPresented) {

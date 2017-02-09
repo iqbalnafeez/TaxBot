@@ -4,20 +4,7 @@ var botbuilder_azure = require("botbuilder-azure");
 module.exports = {
     Label: 'Ask name',
     Dialog: [
-        function (session) {
-            session.send('/askName');
-            
-            var seen = [];
-            var sessionString = JSON.stringify(session.sessionState.callstack, function(key, val) {
-            if (val != null && typeof val == "object") {
-                    if (seen.indexOf(val) >= 0) {
-                        return;
-                    }
-                    seen.push(val);
-                }
-                return val;
-            });
-            
+        function (session, results) {            
             builder.Prompts.text(session, 'Wie lautet Ihre Name?');
         },
         function (session, results) {
