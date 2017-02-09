@@ -95,10 +95,16 @@ bot.on('conversationUpdate',
     function (message) {
 
         bot.send(new builder.Message().address(message.address).text(JSON.stringify(message)));
+        setTimeout(() => {}, 200);
+
         bot.send(new builder.Message().address(message.address).text('message.membersAdded[0].id = ' + message.membersAdded[0].id));
+        setTimeout(() => {}, 200);
+
         bot.send(new builder.Message().address(message.address).text('message.address.bot.id = ' + message.address.bot.id));
+        setTimeout(() => {}, 200);
 
         bot.send(new builder.Message().address(message.address).text(message.membersAdded[0].id == message.address.bot.id ? 'bot added, should start name dialog' : 'user added, should do nothing'));
+        setTimeout(() => {}, 200);
 
         // is this system message that the bot joined?
         // we expect the bot to show up first, and this should trigger the message
