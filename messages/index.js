@@ -94,6 +94,9 @@ dialogPrompts["/"] = {
 bot.on('conversationUpdate', 
     function (message) {
 
+        bot.send(new builder.Message().address(message.address).text('internal msg received >>>'));
+        bot.send(new builder.Message().address(message.address).text(JSON.stringify(message)));
+
         // is this system message that the bot joined?
         // then do not respond, because bot 
         if (message.membersAdded[0].id == message.address.bot.id) {
