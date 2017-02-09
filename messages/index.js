@@ -94,18 +94,16 @@ dialogPrompts["/"] = {
 bot.on('conversationUpdate', 
     function (message) {
 
-        bot.send(new builder.Message().address(message.address).text('internal msg received >>>'));
-        bot.send(new builder.Message().address(message.address).text(JSON.stringify(message)));
+        // bot.send(new builder.Message().address(message.address).text('internal msg received >>>'));
+        // bot.send(new builder.Message().address(message.address).text(JSON.stringify(message)));
+
 
         // is this system message that the bot joined?
-        // then do not respond, because bot 
-        if (message.membersAdded[0].id == message.address.bot.id) {
+        // we expect the bot to show up first, and this should trigger the message
+        if (message.membersAdded[0].id != message.address.bot.id) {
+            // if it's not the bot, ignore the whole 'conversationUpdate'
             return;
         }
-
-        // replace the address in the system message with the address of the user 
-        // #TODO: find out how addresses work
-        message.address.user = message.membersAdded[0];
 
         var greetingText = 'Grüezi! Ich bin der KPMG Virtual Tax Advisor.\n\n\nGerne unterstütze ich Sie bei Unklarheiten im Zusammenhang mit der Unternehmenssteuerreform III (USR III).' + dialogPrompts["/"].entryPrompt;
 
@@ -116,6 +114,7 @@ bot.on('conversationUpdate',
         bot.send(reply);
 
         bot.beginDialog(message.address, '*:/');
+        
 });
 
 /*
