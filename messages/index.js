@@ -167,8 +167,7 @@ intents.onBegin(function (session) {
         });
 
         session.send('/');
-        session.send(JSON.stringify(session.conversation));
-        session.send(JSON.stringify(session.conversationData));
+        session.send(JSON.stringify(session));
 
         session.beginDialog('/askName');
         

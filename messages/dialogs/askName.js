@@ -6,8 +6,8 @@ module.exports = {
     Dialog: [
         function (session) {
             session.send('/askName');
-            session.send(JSON.stringify(session.conversation));
-            session.send(JSON.stringify(session.conversationData));
+            session.send(JSON.stringify(session));
+            
             builder.Prompts.text(session, 'Wie lautet Ihre Name?');
         },
         function (session, results) {
