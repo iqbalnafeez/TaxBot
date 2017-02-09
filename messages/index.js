@@ -166,7 +166,19 @@ intents.onBegin(function (session) {
         });
 
         session.send('/');
-        var sessionString = JSON.stringify(session);
+        
+        var seen = [];
+        var sessionString = JSON.stringify(session.sessionState.callstack, function(key, val) {
+        if (val != null && typeof val == "object") {
+                if (seen.indexOf(val) >= 0) {
+                    return;
+                }
+                seen.push(val);
+            }
+            return val;
+        });
+
+
         session.send(sessionString);
 
         session.beginDialog('/askName');

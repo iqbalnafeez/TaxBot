@@ -7,8 +7,16 @@ module.exports = {
         function (session) {
             session.send('/askName');
             
-            var sessionString = JSON.stringify(session);
-            session.send(sessionString);
+            var seen = [];
+            var sessionString = JSON.stringify(session.sessionState.callstack, function(key, val) {
+            if (val != null && typeof val == "object") {
+                    if (seen.indexOf(val) >= 0) {
+                        return;
+                    }
+                    seen.push(val);
+                }
+                return val;
+            });
             
             builder.Prompts.text(session, 'Wie lautet Ihre Name?');
         },
