@@ -97,14 +97,14 @@ bot.on('conversationUpdate',
         //bot.send(new builder.Message().address(message.address).text(JSON.stringify(message)));
         setTimeout(() => {return}, 200);
 
-        bot.send(new builder.Message().address(message.address).text('message.membersAdded[0].id = ' + message.membersAdded[0].id));
-        setTimeout(() => {return}, 200);
+        //bot.send(new builder.Message().address(message.address).text('message.membersAdded[0].id = ' + message.membersAdded[0].id));
+        //setTimeout(() => {return}, 200);
 
-        bot.send(new builder.Message().address(message.address).text('message.address.bot.id = ' + message.address.bot.id));
-        setTimeout(() => {return}, 200);
+        //bot.send(new builder.Message().address(message.address).text('message.address.bot.id = ' + message.address.bot.id));
+        //setTimeout(() => {return}, 200);
 
-        bot.send(new builder.Message().address(message.address).text(message.membersAdded[0].id == message.address.bot.id ? 'bot added, should start name dialog' : 'user added, should do nothing'));
-        setTimeout(() => {return}, 200);
+        //bot.send(new builder.Message().address(message.address).text(message.membersAdded[0].id == message.address.bot.id ? 'bot added, should start name dialog' : 'user added, should do nothing'));
+        //setTimeout(() => {return}, 200);
 
         // is this system message that the bot joined?
         // we expect the bot to show up first, and this should trigger the message
@@ -165,6 +165,10 @@ intents.onBegin(function (session) {
         Object.keys(usr3AnswersDB).forEach(function (key) {
             session.privateConversationData.usr3Answers[key] = {presented: false, active: false};
         });
+
+        session.send('/');
+        session.send(JSON.stringify(session.conversation));
+        session.send(JSON.stringify(session.conversationData));
 
         session.beginDialog('/askName');
         
