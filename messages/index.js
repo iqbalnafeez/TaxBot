@@ -101,6 +101,9 @@ bot.on('conversationUpdate',
         // we expect the bot to show up first, and this should trigger the message
         if (message.membersAdded[0].id != message.address.bot.id) {
             // if it's not the bot, ignore the whole 'conversationUpdate'
+
+            console.log('Jumping out of conversationUpdate');
+
             return;
         }
 
