@@ -16,12 +16,19 @@ var azure = require('azure-storage');
 var didYouMean = require("didyoumean2");
 
 // Dictionaries
-var qnadict = require('./dictionaries/qnadict');
-var usr3questions = require('./dictionaries/usr3questions');
-var usr3answers = require('./dictionaries/usr3answers');
+var glossaryLookup = require('./glossaryLookup');
 
-// Connection to a remote NoSQL database
-// Azure Table Storage
+var qnaDB = require('./dictionaries/glossary');
+var usr3QuestionsDB = require('./dictionaries/usr3questions');
+var usr3AnswersDB = require('./dictionaries/usr3answers');
+
+// helper to create herocards
+var makeherocard = require('./makeherocard');
+
+// Path to folder with images
+const pathToImages = 'http://kpmgvirtualtaxadvisor.azurewebsites.net/images/';
+
+// Connection to a remote NoSQL database Azure Table Storage
 var tableName = 'TaxBotStore';
 var tableSvc = azure.createTableService();
 tableSvc.createTableIfNotExists(tableName, function(error, result, response){
@@ -64,62 +71,92 @@ var intents = new builder.IntentDialog({ recognizers: [recognizer] });
 var di_askGenericYesNo = require('./dialogs/askGenericYesNo');
 var di_askName = require('./dialogs/askName');
 var di_askContactNames = require('./dialogs/askContactNames');
-var di_askTelephone = require('./dialogs/askTelephone');
-var di_askEmail = require('./dialogs/askEmail');
 var di_askCanton = require('./dialogs/askCanton');
-var di_closeContactForm = require('./dialogs/closeContactForm');
-var di_greetUser = require('./dialogs/greetUser');
+var di_giveSingleAnswer = require('./dialogs/giveSingleAnswer');
 
 bot.dialog('/askGenericYesNo', di_askGenericYesNo.Dialog);
 bot.dialog('/askName', di_askName.Dialog);
 bot.dialog('/askContactNames', di_askContactNames.Dialog);
-bot.dialog('/askTelephone', di_askTelephone.Dialog);
-bot.dialog('/askEmail', di_askEmail.Dialog);
 bot.dialog('/askCanton', di_askCanton.Dialog);
-bot.dialog('/closeContactForm', di_closeContactForm.Dialog);
-bot.dialog('/greetUser', di_greetUser.Dialog);
+bot.dialog('/giveSingleAnswer', di_giveSingleAnswer.Dialog);
+
+ // workaround for azure
+var botAdded = false;
+
+// store reusable texts in a single place
+var dialogPrompts = {}
+dialogPrompts["/"] = {
+    entryPrompt:"Sie können mir Fragen zu Elementen der USR III oder zu Begriffen im Zusammenhang mit der USR III stellen. Gerne können wir aber auch gemeinsam analysieren, inwiefern die USR III Auswirkungen auf Ihr Unternehmen haben wird. Geben Sie für letzteres einfach Auswirkungen ins Eingabefeld ein.<br>&nbsp;<br>Ich freue mich auf das Gespräch mit Ihnen.", exitPrompt: "Bye"
+}
 
 // Starting a new conversation will trigger this message
+// updating following the guidance from MS
 bot.on('conversationUpdate', 
     function (message) {
-        if (message.membersAdded) {
-            message.membersAdded.forEach((identity) => {
-                if (identity.id === message.address.bot.id) {
-                    var instructions = 'Grüezi! Ich bin der KPMG Virtual Tax Advisor, der USR III Chatbot.';
-                    var reply = new builder.Message()
-                        .address(message.address)
-                        .text(instructions);
-                    bot.send(reply);
-                }
-            });
-        }
-    }
-);
+
+        // is this system message that the bot joined?
+        // we expect the bot to show up first, and this should trigger the message
+        if (message.membersAdded[0].id != message.address.bot.id) {
+            // if it's not the bot, ignore the whole 'conversationUpdate'          
+            return; // !!! this still does not work on the higly async web chat, and the code after return is executed nonetheless !!!
+        };
+
+        var greetingText = 'Grüezi! Ich bin der KPMG Virtual Tax Advisor. Gerne unterstütze ich Sie bei Unklarheiten im Zusammenhang mit der Unternehmenssteuerreform III (USR III).<br>&nbsp;<br>' + dialogPrompts["/"].entryPrompt;
+
+        var reply = new builder.Message()
+            .textFormat(builder.TextFormat.xml)
+            .address(message.address)
+            .text(greetingText);
+
+        bot.send(reply);
+
+        bot.beginDialog(message.address, '/');
+
+});
+
+/*
+#### ##    ## #### ######## 
+ ##  ###   ##  ##     ##    
+ ##  ####  ##  ##     ##    
+ ##  ## ## ##  ##     ##    
+ ##  ##  ####  ##     ##    
+ ##  ##   ###  ##     ##    
+#### ##    ## ####    ##    
+*/
 
 intents.onBegin(function (session) {
     if (!session.privateConversationData.existingSession) {
         session.privateConversationData.existingSession = true;
         session.privateConversationData.usr3dialogPresented = false;
-        session.privateConversationData.familyname = "";
-        session.privateConversationData.firstname = "";
-        session.privateConversationData.company = "";
-        session.privateConversationData.position = "";
-        session.privateConversationData.email = "";
-        session.privateConversationData.telephone = "";
-        session.privateConversationData.callTimes = "";
-        session.privateConversationData.other = "";
+        
+        // new variables for simplified contact entry: 
+        session.privateConversationData.fullname = "";
+        session.privateConversationData.fullcontact = "";
+
         session.privateConversationData.canton = "";
-        session.privateConversationData.usr3questions = {};
-        session.privateConversationData.usr3answers = {};
-        Object.keys(usr3questions).forEach(function (key) {
-            session.privateConversationData.usr3questions[key] = "";
+
+        // usr3Questions are the USER'S ANSWERS (e.g. holding = true/false) to the questions in Auswirkungen dialog
+        session.privateConversationData.usr3Questions = {};
+        
+        // usr3Answers are the BOT'S ANSWERS corresponding to combinations of USER'S ANSWERS
+        session.privateConversationData.usr3Answers = {};
+
+        // create variables that will hold user's answers true/false, set them to empty
+        Object.keys(usr3QuestionsDB).forEach(function (key) {
+            session.privateConversationData.usr3Questions[key] = "";
         });
-        Object.keys(usr3answers).forEach(function (key) {
-            session.privateConversationData.usr3answers[key] = {presented: false, active: false};
+
+        // create variables that will hold bot's detailed answers
+        Object.keys(usr3AnswersDB).forEach(function (key) {
+            session.privateConversationData.usr3Answers[key] = {presented: false, active: false};
         });
+
         session.beginDialog('/askName');
+        
     } else {
-        session.send("Was mehr möcten Sie im Zusammenhang mit der USR III wissen?");
+
+        // !!!!!!!!!!!!!!!! here we need to start a general dialog (show me glossary or effects ????)
+        session.send("Was mehr möchten Sie wissen im Zusammenhang mit der USR III?");
     }
 });
 
@@ -127,39 +164,22 @@ bot.dialog('/contactForm', [
     function (session) {
         session.beginDialog('/askContactNames');
     },
-    function (session, results) {
-        if (results) {
-            if (results.entity=='Telefon') {
-                session.beginDialog('/askTelephone');
-            } else if (results.entity=='Email') {
-                session.beginDialog('/askEmail');
-            }
-        }
-    },
-    function (session) {
-        session.beginDialog('/closeContactForm');
-    },
     function(session){
         var row = {
             PartitionKey: entGen.String(session.message.user.id),
             RowKey: entGen.String(session.message.address.conversation.id),
-            familyname: entGen.String(session.privateConversationData.familyname),
-            firstname: entGen.String(session.privateConversationData.firstname),
-            company: entGen.String(session.privateConversationData.company),
-            position: entGen.String(session.privateConversationData.position),
-            email: entGen.String(session.privateConversationData.email),
-            telephone: entGen.String(session.privateConversationData.telephone),
-            callTimes: entGen.String(session.privateConversationData.callTimes),
-            other: entGen.String(session.privateConversationData.other),
+            timestamp: entGen.DateTime(new Date()),
+            fullname: entGen.String(session.privateConversationData.fullname),
+            fullcontact: entGen.String(session.privateConversationData.fullcontact),
             canton: entGen.String(session.privateConversationData.canton),
-            holding: entGen.String(session.privateConversationData.usr3questions.holding),
-            stilleReserven: entGen.String(session.privateConversationData.usr3questions.stilleReserven),
-            patents: entGen.String(session.privateConversationData.usr3questions.patents),
-            IP_CH: entGen.String(session.privateConversationData.usr3questions.IP_CH),
-            eigenfinanzierung: entGen.String(session.privateConversationData.usr3questions.eigenfinanzierung),
-            FE_CH: entGen.String(session.privateConversationData.usr3questions.FE_CH),
-            IP_Foreign3rdParty: entGen.String(session.privateConversationData.usr3questions.IP_Foreign3rdParty),
-            vermoegen: entGen.String(session.privateConversationData.usr3questions.vermoegen)
+            holding: entGen.String(session.privateConversationData.usr3Questions.holding),
+            stilleReserven: entGen.String(session.privateConversationData.usr3Questions.stilleReserven),
+            patents: entGen.String(session.privateConversationData.usr3Questions.patents),
+            IP_CH: entGen.String(session.privateConversationData.usr3Questions.IP_CH),
+            eigenfinanzierung: entGen.String(session.privateConversationData.usr3Questions.eigenfinanzierung),
+            FE_CH: entGen.String(session.privateConversationData.usr3Questions.FE_CH),
+            IP_Foreign3rdParty: entGen.String(session.privateConversationData.usr3Questions.IP_Foreign3rdParty),
+            vermoegen: entGen.String(session.privateConversationData.usr3Questions.vermoegen)
         };
         tableSvc.insertEntity(tableName, row, function (error, result, response) {
             if(!error){
@@ -173,117 +193,234 @@ bot.dialog('/contactForm', [
     }
 ]);
 
+// replies are collected in session.privateConversationData.usr3Answers
+// depending on the combinations of collected replies, e.g. Q1=yes, Q2=no => 'Latente Steuern'...
+// finds a relevant reply in usr3AnswersDB
 bot.dialog('/replyUSR3', [
     function (session) {
+        session.privateConversationData.currentAnswerKey = "";
         var key = 'ordSteuersaetze';
+        /*
+            this question applies at all times
+        */        
         if (session.privateConversationData.canton
-            && !session.privateConversationData.usr3answers[key].presented) {
-            session.send(usr3answers[key]);
-            session.privateConversationData.usr3answers[key].active = true;
-            session.privateConversationData.usr3answers[key].presented = true;
+            && !session.privateConversationData.usr3Answers[key].presented) {
+            
+            session.privateConversationData.usr3Answers[key].active = true;
+            session.privateConversationData.usr3Answers[key].presented = true;
+            
+            // answer applies, so we give the answer and output the related glossary
+            var args = usr3AnswersDB[key];
+            session.beginDialog('/giveSingleAnswer', args);
+
         };
+
         var key = 'auswirkungLatenteSteuern';
-        if (session.privateConversationData.usr3questions.rechnungslegungIFRS 
-            && session.privateConversationData.usr3questions.latenteSteuern
-            && !session.privateConversationData.usr3answers[key].presented) {
-            session.send(usr3answers[key]);
-            session.privateConversationData.usr3answers[key].active = true;
-            session.privateConversationData.usr3answers[key].presented = true;
+        /*
+            holding =                   yes
+            latente steuern =           yes
+        */
+        if (session.privateConversationData.usr3Questions.rechnungslegungIFRS 
+            && session.privateConversationData.usr3Questions.latenteSteuern
+            && !session.privateConversationData.usr3Answers[key].presented) {
+
+            session.privateConversationData.usr3Answers[key].active = true;
+            session.privateConversationData.usr3Answers[key].presented = true;
+            
+            // answer applies, so we give the answer and output the related glossary
+            var args = usr3AnswersDB[key];
+            session.beginDialog('/giveSingleAnswer', args);
+
         };
         var key = 'altrechtlicherStepup';
-        if (session.privateConversationData.usr3questions.holding 
-            && session.privateConversationData.usr3questions.stilleReserven
-            && !session.privateConversationData.usr3answers[key].presented) {
-            session.send(usr3answers[key]);
-            session.privateConversationData.usr3answers[key].active = true;
-            session.privateConversationData.usr3answers[key].presented = true;
+        /*
+            holding =                   yes
+            stille reserven =           yes
+            stille reserven gewinn =    no
+        */
+        if (session.privateConversationData.usr3Questions.holding 
+            && session.privateConversationData.usr3Questions.stilleReserven
+            && !session.privateConversationData.usr3Questions.stilleReservenGewinn
+            && !session.privateConversationData.usr3Answers[key].presented) {
+
+            session.privateConversationData.usr3Answers[key].active = true;
+            session.privateConversationData.usr3Answers[key].presented = true;
+            
+            // answer applies, so we give the answer and output the related glossary
+            var args = usr3AnswersDB[key];
+            session.beginDialog('/giveSingleAnswer', args);
+
         };
         var key = 'neurechtlicherStepup';
-        if (session.privateConversationData.usr3questions.holding 
-            && session.privateConversationData.usr3questions.stilleReserven
-            && !session.privateConversationData.usr3questions.stilleReservenGewinn
-            && !session.privateConversationData.usr3answers[key].presented) {
-            session.send(usr3answers[key]);
-            session.privateConversationData.usr3answers[key].active = true;
-            session.privateConversationData.usr3answers[key].presented = true;
+        /*
+            holding =                   yes
+            stille reserven =           yes
+            stille reserven gewinn =    yes
+        */
+        if (session.privateConversationData.usr3Questions.holding 
+            && session.privateConversationData.usr3Questions.stilleReserven
+            && session.privateConversationData.usr3Questions.stilleReservenGewinn
+            && !session.privateConversationData.usr3Answers[key].presented) {
+
+            session.privateConversationData.usr3Answers[key].active = true;
+            session.privateConversationData.usr3Answers[key].presented = true;
+            
+            // answer applies, so we give the answer and output the related glossary
+            var args = usr3AnswersDB[key];
+            session.beginDialog('/giveSingleAnswer', args);
+
         };
         var key = 'patentbox';
-        if (session.privateConversationData.usr3questions.patents 
-            && (session.privateConversationData.usr3questions.IP_CH || session.privateConversationData.usr3questions.IP_Foreign3rdParty)
-            && !session.privateConversationData.usr3answers[key].presented) {
-            session.send(usr3answers[key]);
-            session.privateConversationData.usr3answers[key].active = true;
-            session.privateConversationData.usr3answers[key].presented = true;
+        /*
+            patente =                   yes
+            IP CH =                     yes 
+                OR 
+            IP Foreign =                yes
+        */        
+        if (session.privateConversationData.usr3Questions.patents 
+            && (session.privateConversationData.usr3Questions.IP_CH || session.privateConversationData.usr3Questions.IP_Foreign3rdParty)
+            && !session.privateConversationData.usr3Answers[key].presented) {
+                
+            session.privateConversationData.usr3Answers[key].active = true;
+            session.privateConversationData.usr3Answers[key].presented = true;
+            
+            // answer applies, so we give the answer and output the related glossary
+            var args = usr3AnswersDB[key];
+            session.beginDialog('/giveSingleAnswer', args);
+
         };
         var key = 'feMehrfachabzug';
-        if (session.privateConversationData.usr3questions.FE_CH 
-            && !session.privateConversationData.usr3answers[key].presented) {
-            session.send(usr3answers[key]);
-            session.privateConversationData.usr3answers[key].active = true;
-            session.privateConversationData.usr3answers[key].presented = true;
+        /*
+            F&E in CH =                 yes
+        */          
+        if (session.privateConversationData.usr3Questions.FE_CH 
+            && !session.privateConversationData.usr3Answers[key].presented) {
+                
+            session.privateConversationData.usr3Answers[key].active = true;
+            session.privateConversationData.usr3Answers[key].presented = true;
+            
+            // answer applies, so we give the answer and output the related glossary
+            var args = usr3AnswersDB[key];
+            session.beginDialog('/giveSingleAnswer', args);
+
         };
         var key = 'nidSpecial';
-        if (session.privateConversationData.usr3questions.eigenfinanzierung 
-            && !session.privateConversationData.usr3questions.vermoegen
-            && session.privateConversationData.usr3questions.aktivdarlehen
-            && !session.privateConversationData.usr3answers[key].presented) {
-            session.send(usr3answers[key]);
-            session.privateConversationData.usr3answers[key].active = true;
-            session.privateConversationData.usr3answers[key].presented = true;
+        /*
+            eigenkapital =              yes
+            vermoegen nicht betrieb =   no
+        */          
+        if (session.privateConversationData.usr3Questions.eigenfinanzierung 
+            && !session.privateConversationData.usr3Questions.vermoegen
+//            && session.privateConversationData.usr3Questions.aktivdarlehen
+            && !session.privateConversationData.usr3Answers[key].presented) {
+                
+            session.privateConversationData.usr3Answers[key].active = true;
+            session.privateConversationData.usr3Answers[key].presented = true;
+            
+            // answer applies, so we give the answer and output the related glossary
+            var args = usr3AnswersDB[key];
+            session.beginDialog('/giveSingleAnswer', args);
+
         };
         var key = 'nidCommon';
-        if (session.privateConversationData.usr3questions.eigenfinanzierung 
-            && !session.privateConversationData.usr3questions.vermoegen
-            && !session.privateConversationData.usr3questions.aktivdarlehen
-            && !session.privateConversationData.usr3answers[key].presented) {
-            session.send(usr3answers[key]);
-            session.privateConversationData.usr3answers[key].active = true;
-            session.privateConversationData.usr3answers[key].presented = true;
+       
+        if (session.privateConversationData.usr3Questions.eigenfinanzierung 
+            && !session.privateConversationData.usr3Questions.vermoegen
+            && !session.privateConversationData.usr3Questions.aktivdarlehen
+            && !session.privateConversationData.usr3Answers[key].presented) {
+                
+            session.privateConversationData.usr3Answers[key].active = true;
+            session.privateConversationData.usr3Answers[key].presented = true;
+            
+            // answer applies, so we give the answer and output the related glossary
+            var args = usr3AnswersDB[key];
+            session.beginDialog('/giveSingleAnswer', args);
+
         };
         var key = 'erleichtungKapitalsteuer';
-        if ( session.privateConversationData.usr3questions.patents
-            || (session.privateConversationData.usr3questions.eigenfinanzierung && session.privateConversationData.usr3questions.vermoegen)
-            && !session.privateConversationData.usr3answers[key].presented) {
-            session.send(usr3answers[key]);
-            session.privateConversationData.usr3answers[key].active = true;
-            session.privateConversationData.usr3answers[key].presented = true;
+        /*
+            patente =                   yes
+                OR
+            vermoegen nicht betrieb =   yes
+        */            
+        if ( (session.privateConversationData.usr3Questions.patents
+            || session.privateConversationData.usr3Questions.vermoegen)
+            && !session.privateConversationData.usr3Answers[key].presented) {
+                
+            session.privateConversationData.usr3Answers[key].active = true;
+            session.privateConversationData.usr3Answers[key].presented = true;
+            
+            // answer applies, so we give the answer and output the related glossary
+            var args = usr3AnswersDB[key];
+            session.beginDialog('/giveSingleAnswer', args);
+
         };
-        session.endDialog();
+
+        // if we reach here, no answer was found
+
     }
 ]);
 
 bot.dialog('/askUSR3Questions', [
     function (session) {
-        session.privateConversationData.usr3dialogPresented = true;
-        session.beginDialog('/askCanton');
-    },
-    function (session) {
-        session.privateConversationData.currentQuestionKey = "rechnungslegungIFRS";
-        session.beginDialog('/askGenericYesNo', {key: session.privateConversationData.currentQuestionKey, 
-            prompt: usr3questions[session.privateConversationData.currentQuestionKey]});
-    },
-    function (session) {
-        session.privateConversationData.currentQuestionKey = "latenteSteuern";
-        session.beginDialog('/askGenericYesNo', {key: session.privateConversationData.currentQuestionKey, 
-            prompt: usr3questions[session.privateConversationData.currentQuestionKey]});
+        session.beginDialog('/askUSR3IntroQuestions');
     },
     function (session) {
         session.beginDialog('/replyUSR3');
     }, 
+    // /// // // / / / ///// // / //// // /// // // / / / ///// // / //// // /// // // / / / ///// // / //// // /// // // / / / ///// // / //// 
+    // HERE we should have another prompt: Continue - yes / no
     function (session) {
-        session.beginDialog('/askUSR3StepUpQuestions');
+        var prompt = "Möchten Sie weiter analysieren und Fragen über stille Reserven beantworten?"
+        builder.Prompts.choice(session, prompt, "Ja|Nein", {listStyle: 3, retryPrompt: "I verstehe nicht. Bitte antworten 'ja' oder 'nein'."});
     },
+    function (session, results) {
+        if (results.response.entity != 'Ja') {
+            session.send(dialogPrompts["/"].entryPrompt);
+            session.replaceDialog('/');
+        }
+        else {
+            // ask next questions
+            session.beginDialog('/askUSR3StepUpQuestions');
+        }
+    },
+    // /// // // / / / ///// // / //// // /// // // / / / ///// // / //// // /// // // / / / ///// // / //// // /// // // / / / ///// // / //// 
     function (session) {
         session.beginDialog('/replyUSR3');
     }, 
-    function (session) {        
-        session.beginDialog('/askUSR3IPQuestions');
+        function (session) {
+        var prompt = "Möchten Sie weiter analysieren und Fragen über Patente und IP beantworten?"
+        builder.Prompts.choice(session, prompt, "Ja|Nein", {listStyle: 3, retryPrompt: "I verstehe nicht. Bitte antworten 'ja' oder 'nein'."});
+    },
+    function (session, results) {
+        if (results.response.entity != 'Ja') {
+            session.send(dialogPrompts["/"].entryPrompt);
+            session.replaceDialog('/');
+        }
+        else {
+            // ask next questions
+            session.beginDialog('/askUSR3IPQuestions');
+        }
     },
     function (session) {
         session.beginDialog('/replyUSR3');        
     }, 
-    function (session) {        
-        session.beginDialog('/askUSR3NIDQuestions');
+        function (session) {
+        session.beginDialog('/replyUSR3');
+    }, 
+        function (session) {
+        var prompt = "Möchten Sie weiter analysieren und Fragen über kalkulatorischen Zinsabzug beantworten?"
+        builder.Prompts.choice(session, prompt, "Ja|Nein", {listStyle: 3, retryPrompt: "I verstehe nicht. Bitte antworten 'ja' oder 'nein'."});
+    },
+    function (session, results) {
+        if (results.response.entity != 'Ja') {
+            session.send(dialogPrompts["/"].entryPrompt);
+            session.replaceDialog('/');
+        }
+        else {
+            // ask next questions
+            session.beginDialog('/askUSR3NIDQuestions');
+        }
     }, 
     function (session) {
         session.beginDialog('/replyUSR3');
@@ -293,21 +430,39 @@ bot.dialog('/askUSR3Questions', [
     }
 ]);
 
+bot.dialog('/askUSR3IntroQuestions', [
+    function(session) {
+        session.privateConversationData.usr3dialogPresented = true;
+        session.send('Um die Auswirkungen der USR3 für Ihre Unternehmen genauer zu beurteilen, werde ich Sie einige Serien Fragen stellen.');
+        session.beginDialog('/askCanton');
+    },
+    function (session) {
+        session.privateConversationData.currentQuestionKey = "rechnungslegungIFRS";
+        session.beginDialog('/askGenericYesNo', {key: session.privateConversationData.currentQuestionKey, 
+            prompt: usr3QuestionsDB[session.privateConversationData.currentQuestionKey]});
+    },
+    function (session) {
+        session.privateConversationData.currentQuestionKey = "latenteSteuern";
+        session.beginDialog('/askGenericYesNo', {key: session.privateConversationData.currentQuestionKey, 
+            prompt: usr3QuestionsDB[session.privateConversationData.currentQuestionKey]});
+    }
+]);
+
 bot.dialog('/askUSR3StepUpQuestions', [
     function (session) {
         session.privateConversationData.currentQuestionKey = "holding";
         session.beginDialog('/askGenericYesNo', {key: session.privateConversationData.currentQuestionKey, 
-            prompt: usr3questions[session.privateConversationData.currentQuestionKey]});
+            prompt: usr3QuestionsDB[session.privateConversationData.currentQuestionKey]});
     },
     function (session) {
         session.privateConversationData.currentQuestionKey = "stilleReserven";
         session.beginDialog('/askGenericYesNo', {key: session.privateConversationData.currentQuestionKey, 
-            prompt: usr3questions[session.privateConversationData.currentQuestionKey]});
+            prompt: usr3QuestionsDB[session.privateConversationData.currentQuestionKey]});
     },
     function (session) {
         session.privateConversationData.currentQuestionKey = "stilleReservenGewinn";
         session.beginDialog('/askGenericYesNo', {key: session.privateConversationData.currentQuestionKey, 
-            prompt: usr3questions[session.privateConversationData.currentQuestionKey]});
+            prompt: usr3QuestionsDB[session.privateConversationData.currentQuestionKey]});
     }
 ]);
 
@@ -315,22 +470,22 @@ bot.dialog('/askUSR3IPQuestions', [
     function (session) {
         session.privateConversationData.currentQuestionKey = "patents";
         session.beginDialog('/askGenericYesNo', {key: session.privateConversationData.currentQuestionKey, 
-            prompt: usr3questions[session.privateConversationData.currentQuestionKey]});
+            prompt: usr3QuestionsDB[session.privateConversationData.currentQuestionKey]});
     },  
     function (session) {
         session.privateConversationData.currentQuestionKey = "IP_CH";
         session.beginDialog('/askGenericYesNo', {key: session.privateConversationData.currentQuestionKey, 
-            prompt: usr3questions[session.privateConversationData.currentQuestionKey]});
+            prompt: usr3QuestionsDB[session.privateConversationData.currentQuestionKey]});
     },  
     function (session) {
         session.privateConversationData.currentQuestionKey = "IP_Foreign3rdParty";
         session.beginDialog('/askGenericYesNo', {key: session.privateConversationData.currentQuestionKey, 
-            prompt: usr3questions[session.privateConversationData.currentQuestionKey]});
+            prompt: usr3QuestionsDB[session.privateConversationData.currentQuestionKey]});
     },
     function (session) {
         session.privateConversationData.currentQuestionKey = "FE_CH";
         session.beginDialog('/askGenericYesNo', {key: session.privateConversationData.currentQuestionKey, 
-            prompt: usr3questions[session.privateConversationData.currentQuestionKey]});
+            prompt: usr3QuestionsDB[session.privateConversationData.currentQuestionKey]});
     }  
 ]);
 
@@ -338,25 +493,23 @@ bot.dialog('/askUSR3NIDQuestions', [
     function (session) {
         session.privateConversationData.currentQuestionKey = "eigenfinanzierung";
         session.beginDialog('/askGenericYesNo', {key: session.privateConversationData.currentQuestionKey, 
-            prompt: usr3questions[session.privateConversationData.currentQuestionKey]});
+            prompt: usr3QuestionsDB[session.privateConversationData.currentQuestionKey]});
     },  
     function (session) {
         session.privateConversationData.currentQuestionKey = "vermoegen";
         session.beginDialog('/askGenericYesNo', {key: session.privateConversationData.currentQuestionKey, 
-            prompt: usr3questions[session.privateConversationData.currentQuestionKey]});
+            prompt: usr3QuestionsDB[session.privateConversationData.currentQuestionKey]});
     },  
     function (session) {
         session.privateConversationData.currentQuestionKey = "aktivdarlehen";
         session.beginDialog('/askGenericYesNo', {key: session.privateConversationData.currentQuestionKey, 
-            prompt: usr3questions[session.privateConversationData.currentQuestionKey]});
+            prompt: usr3QuestionsDB[session.privateConversationData.currentQuestionKey]});
     }
 ]);
 
 bot.dialog('/promptContactForm', [
     function (session) {
-        builder.Prompts.choice(session, "Darf einer unserer Steuerfachpersonen Sie diesbezüglich kontaktieren?", 
-            ['Ja', 'Nein'],
-            {retryPrompt: "I verstehe nicht. Bitte antworten 'ja' oder 'nein'."});
+        builder.Prompts.choice(session, "Darf einer unserer Steuerfachpersonen Sie diesbezüglich kontaktieren?", "Ja|Nein", {listStyle: 3, retryPrompt: "I verstehe nicht. Bitte antworten 'ja' oder 'nein'."});
     }, 
     function (session, results) {
         if (results.response) {
@@ -371,16 +524,14 @@ bot.dialog('/promptContactForm', [
 
 bot.dialog('/promptUSR3Effects', [
     function (session) {
-        builder.Prompts.choice(session, "Möchten Sie wissen welche auswirkungen die USR III kann haben auf Ihre Unternehmen?", 
-            ['Ja', 'Nein'],
-            {retryPrompt: "I verstehe nicht. Bitte antworten 'ja' oder 'nein'."});
+        builder.Prompts.choice(session, "Möchten Sie wissen welche auswirkungen die USR III kann haben auf Ihre Unternehmen?", "Ja|Nein", {listStyle: 3, retryPrompt: "I verstehe nicht. Bitte antworten 'ja' oder 'nein'."});
     }, 
     function (session, results) {
         if (results.response) {
             if (results.response.entity == 'Ja') {
                 session.replaceDialog('/askUSR3Questions');
             } else if (results.response.entity == 'Nein') {
-                session.send("Kann ich Ihnen bei einer weiteren Frage betreffend USTR III behilflich sein?");
+                session.beginDialog('/promptContactForm');
             }
         }
     }
@@ -388,10 +539,6 @@ bot.dialog('/promptUSR3Effects', [
 
 intents.matches(/^version/i, function (session) {
     session.send('Bot version 0.1');
-});
-
-intents.matches(/^askName/i, function (session) {
-    session.beginDialog('/askName');
 });
 
 intents.matches(/^contactForm/i, function (session) {
@@ -406,15 +553,63 @@ intents.matches('Greet', function (session, args) {
     session.beginDialog('/greetUser', {entities:args.entities});
 });
 
+// ?????????????????? Possible to add another step to QnA dialog, so that there is next()????????????????? what gives???????????????????
 intents.matches('QnA', [
-    function (session, args) {
-        var topic = builder.EntityRecognizer.findEntity(args.entities, 'Topic');
-        console.log(topic);
-        var keys = Object.keys(qnadict);
-        var bestMatch = didYouMean(topic.entity, keys);
-        console.log(bestMatch);
-        session.send('Sie möchten wissen was %s meint? Moment bitte, ich suche ein Antwort führ Sie.', bestMatch);
-        session.send(qnadict[bestMatch]);
+    function (session, args, next) {
+        // LUIS recognizes wording like 'was ist ****' and brings it back under the name of Topic
+        // we can manage the topic recognizing logic on LUIS portal
+        
+        // Problem with LUIS: it recognizes EACH WORD AS SEPARATE TOPIC: if you type "neue steuerreform", it will find "neue" und "steuer"
+        // so we need to merge all topics into one string 
+        var topic = ""
+
+        for(var topicKey in args.entities) {
+            if(args.entities[topicKey].type = 'Topic') {
+                topic += " " + args.entities[topicKey].entity;
+            }
+        }
+        topic = topic.trim();
+
+        // look up the word returned by LUIS in the glossary using our fuzzy lookup function
+        var foundGlossaryArticle = glossaryLookup(topic, qnaDB);
+
+        // if article not found, just end the dialog and return to parent
+        if(!foundGlossaryArticle) {
+            session.endDialog('Leider weiss ich nicht, was es meint. Bitte fragen Sie mir etwas über die Reform.');
+            // force to return, because even tho i call endDialog() above, function execution continues down below, which is not desired
+            session.replaceDialog('/');
+            return;
+        }
+
+		// here we will store a list of HeroCards, one entry is a full HeroCard object with picture etc..
+		var HeroCardArray = [];
+
+		// loop through all contained cards and populate the HeroCardArray - if there are any cards attached to glossary article
+		if(foundGlossaryArticle.object.cards && foundGlossaryArticle.object.cards.length > 0) {
+			var cards = foundGlossaryArticle.object.cards;
+			cards.forEach(
+				function(card) {
+                    var args = {};
+                    args.thumbURL = pathToImages + card;
+                    args.linkURL = pathToImages + card;
+                    args.linkText = 'Bild vergrössern';
+					HeroCardArray.push(makeherocard(session,args))
+				});
+            // create message
+		    var msg = new builder.Message(session);                
+            msg.textFormat(builder.TextFormat.xml)
+			msg.attachmentLayout(builder.AttachmentLayout.carousel)
+			msg.attachments(HeroCardArray);
+		};
+
+        session.send('Sie möchten wissen was %s meint? Moment bitte, ich suche ein Antwort für Sie.', foundGlossaryArticle.key);
+        session.send(foundGlossaryArticle.object.longText);
+        if(msg) {
+            session.send(msg);
+        };
+    }, // first QnA question ends
+    function (session, results) {
+        session.endDialog("Danke für Ihre Fragen.")
     }
 ]);
 
@@ -432,33 +627,25 @@ intents.matches("Help", [
 ]);
 
 intents.matches(/^qna/i, function (session) {
-    session.send('Hier ist meine Inhaltverzeichnis: %s', Object.keys(qnadict));
+    session.send('Hier ist meine Inhaltverzeichnis: %s', Object.keys(qnaDB));
 });
 
 intents.onDefault([(session) => {         
-    session.send("Dies kann ich Ihnen leider nicht beantworten. Bitte beachten Sie, dass dieser ChatBot auf Fragen zur Unternehmenssteuerreform III (USR III) limitiert ist.");        
-    if (session.privateConversationData.usr3dialogPresented) {
-        session.beginDialog('/promptContactForm');
-    } else {
+    // Ignore LUIS and handle the message directly in the bot
+    // if we type auswirk, it will jump us into Auswirkungen dialog
+    var patternAuswirkungen = /.*auswirk.*/i
+    if (patternAuswirkungen.test(session.message.text))    {
+        if(!session.privateConversationData.usr3dialogPresented) {
+            session.replaceDialog('/askUSR3Questions');
+        }
+        else {
+            session.beginDialog('/promptContactForm');
+        }
+    }
+    else {
         session.beginDialog('/promptUSR3Effects');
     }
 }]);
-// intents.onDefault([(session) => {
-//         session.send("Dies kann ich Ihnen leider nicht beantworten. Bitte beachten Sie, dass dieser ChatBot auf Fragen zur Unternehmenssteuerreform III (USR III) limitiert ist.");        
-//         builder.Prompts.choice(session, "Darf einer unserer Steuerfachpersonen Sie diesbezüglich kontaktieren?", 
-//             ['Ja', 'Nein'],
-//             {retryPrompt: "I verstehe nicht. Bitte antworten 'ja' oder 'nein'."});
-//     }, 
-//     function (session, results) {
-//         if (results.response) {
-//             if (results.response.entity == 'Ja') {
-//                 session.replaceDialog('/contactForm');
-//             } else if (results.response.entity == 'Nein') {
-//                 session.send("Kann ich Ihnen bei einer weiteren Frage betreffend USTR III behilflich sein?");
-//             }
-//         }
-//     }
-// ]);
 
 bot.dialog('/', intents);    
 
